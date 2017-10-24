@@ -20,6 +20,20 @@
 #define	RXCNT(bsize,nblock)		(uint16_t)(((bsize & 1) << 15) | ((nblock & 31) << 10))
 
 typedef struct {
+	unsigned rec:5;
+	unsigned type:2;
+	unsigned dir:1;
+}ReqType;
+
+typedef struct {
+	ReqType bmReq;
+	uint8_t bReq;
+	uint16_t wValue;
+	uint16_t wIndex;
+	uint16_t wLen;
+} USBReqestType;
+
+typedef struct {
 	uint32_t EPR[8];
 	uint32_t RESERVED[8];
 	uint32_t CNTR;

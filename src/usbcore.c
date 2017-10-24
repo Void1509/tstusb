@@ -7,6 +7,11 @@
 #include "stm32f10x.h"
 #include "usb.h"
 
+union {
+	USBReqestType req;
+	uint16_t buf[4];
+} reqBuf;
+
 static uint16_t stat;
 
 void usbInit() {

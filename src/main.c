@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
 //	printf("Hello Semi\n");
 //	trace_puts("Hello ARM World!");
 	// Infinite loop
-//	usb_init();
+	usb_init();
 	while (1) {
 		if (GPIOC->IDR & (1 << 11)) LED_SET; else LED_RES;
 		myDelay(1000);

@@ -11,13 +11,16 @@
 #define USB_BASE	((uint32_t)0x40005C00)
 #define USB_PBUFFER	((uint32_t)0x40006000)
 #define EP_BULK			0
-#define EP_CONTROL		1
-#define EP_ISO			2
-#define EP_INT			3
+#define EP_CONTROL		0x200
+#define EP_ISO			0x400
+#define EP_INT			0x600
 #define STALL			1
 #define NAK				2
 #define VALID			3
+#define	STRX				12
+#define STTX				4
 #define	RXCNT(bsize,nblock)		(uint16_t)(((bsize & 1) << 15) | ((nblock & 31) << 10))
+
 
 typedef struct {
 	unsigned rec:5;
@@ -60,6 +63,7 @@ typedef struct {
 	BTElement tx;
 	BTElement rx;
 }BTable;
+
 #pragma pack(push,2)
 typedef union {
 	struct {
@@ -77,4 +81,15 @@ typedef union {
      } bw;
 } uint16_t_uint8_t;
 #pragma pack(pop)
+
+#ifdef MYUSBLIB
+extern BTable *table;
+extern PBElement *PBuffer;
+#endif
+void usb_init();
+void setTableTx(uint8_t inx, uint16_t addr, uint16_t count);
+void setTableRx(uint8_t inx, uint16_t addr, uint16_t count);
+uint16_t getTableTxAddr(uint8_t ep);
+uint16_t getTableRxAddr(uint8_t ep);
+uint16_t getTableRxCount(uint8_t ep);
 #endif /* USB_H_ */

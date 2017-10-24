@@ -18,7 +18,7 @@ void usb_esof_int();
 
 volatile uint16_t intStat;
 
-static BTable *table = (BTable*) USB_PBUFFER;
+BTable *table = (BTable*) USB_PBUFFER;
 PBElement *PBuffer = (PBElement*) USB_PBUFFER;
 uint16_t startPB;
 volatile RXCount rx1;
@@ -40,11 +40,11 @@ void usb_init() {
 
 	RCC_USBCLKConfig(RCC_USBCLKSource_PLLCLK_1Div5);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
-	ep_init();
+//	ep_init();
 	NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
 	USB->BTABLE = 0;
 	USB->DADDR = 0;
-	USB->CNTR = (1<< 10);
+	USB->CNTR = (1 << 10);
 	USB->ISTR = 0;
 //	USB->DADDR = 0x80;
 //	USB_CNTR_CTRM;
@@ -53,10 +53,19 @@ void setTableTx(uint8_t inx, uint16_t addr, uint16_t count) {
 	table[inx].tx.addr.mem = addr;
 	table[inx].tx.count.mem = count;
 }
+uint16_t getTableTxAddr(uint8_t ep) {
+	return (table[ep].tx.addr.mem);
+}
 
 void setTableRx(uint8_t inx, uint16_t addr, uint16_t count) {
 	table[inx].rx.addr.mem = addr;
 	table[inx].rx.count.mem = count;
+}
+uint16_t getTableRxAddr(uint8_t ep) {
+	return (table[ep].rx.addr.mem);
+}
+uint16_t getTableRxCount(uint8_t ep) {
+	return ((table[ep].rx.count.mem) & 0x3ff);
 }
 uint16_t rxcnt(uint16_t bsize, uint16_t nblock) {
 	uint16_t tmp = ((bsize & 1) << 15) | ((nblock & 31) << 10);
@@ -64,13 +73,13 @@ uint16_t rxcnt(uint16_t bsize, uint16_t nblock) {
 }
 void ep_init() {
 	// init table and pocked
-	PBuffer = &PBuffer[EPCOUNT * 8];
-	startPB = EPCOUNT * 8;
+//	PBuffer = &PBuffer[EPCOUNT * 8];
+//	startPB = EPCOUNT * 8;
 	rx1.f.bsize = 1;
 	rx1.f.nblok = 2;
 	setTableTx(0, startPB, 16);
 //	setTableRx(0, startPB + 16, rxcnt(0, 8));
-	setTableRx(0, startPB + 16, RXCNT(0,8));
+	setTableRx(0, startPB + 16, RXCNT(0, 8));
 	// list 1
 	setTableTx(1, startPB + 32, 64);
 	setTableRx(2, startPB + 96, rx1.word);
@@ -105,13 +114,13 @@ void USB_LP_CAN1_RX0_IRQHandler() {
 		USB->ISTR = ~(1 << 14);
 		return;
 	}
-/*
-	if (USB->ISTR & (1 << 13)) {
-		usb_err_int();
-		USB->ISTR = ~(1 << 13);
-		return;
-	}
-*/
+	/*
+	 if (USB->ISTR & (1 << 13)) {
+	 usb_err_int();
+	 USB->ISTR = ~(1 << 13);
+	 return;
+	 }
+	 */
 	if (USB->ISTR & (1 << 10)) {
 		usb_reset_int();
 		USB->ISTR = ~(1 << 10);
@@ -127,7 +136,6 @@ void USB_LP_CAN1_RX0_IRQHandler() {
 		USB->ISTR = ~(1 << 8);
 		return;
 	}
-
 
 }
 void USB_HP_CAN1_TX_IRQHandler(void) {

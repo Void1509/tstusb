@@ -71,6 +71,7 @@ void ep_init() {
 	setTableTx(0, startPB, 16);
 //	setTableRx(0, startPB + 16, rxcnt(0, 8));
 	setTableRx(0, startPB + 16, RXCNT(0,8));
+	// list
 	setTableTx(1, startPB + 32, 64);
 	setTableRx(2, startPB + 96, rx1.word);
 	USB->EPR[0] = (EP_CONTROL << 8);

@@ -46,12 +46,16 @@ void usb_init() {
 	USB->DADDR = 0;
 	USB->CNTR = (1 << 10);
 	USB->ISTR = 0;
+	GPIOC->CRL |= GPIO_CRL_MODE7_1;
 //	USB->DADDR = 0x80;
 //	USB_CNTR_CTRM;
 }
 void setTableTx(uint8_t inx, uint16_t addr, uint16_t count) {
 	table[inx].tx.addr.mem = addr;
 	table[inx].tx.count.mem = count;
+}
+void setTxCount(uint8_t ep, uint16_t cnt) {
+	table[ep].tx.count.mem = cnt;
 }
 uint16_t getTableTxAddr(uint8_t ep) {
 	return (table[ep].tx.addr.mem);
@@ -60,6 +64,9 @@ uint16_t getTableTxAddr(uint8_t ep) {
 void setTableRx(uint8_t inx, uint16_t addr, uint16_t count) {
 	table[inx].rx.addr.mem = addr;
 	table[inx].rx.count.mem = count;
+}
+void setRxCount(uint8_t ep, uint16_t cnt) {
+	table[ep].rx.count.mem = cnt;
 }
 uint16_t getTableRxAddr(uint8_t ep) {
 	return (table[ep].rx.addr.mem);
@@ -79,9 +86,9 @@ void ep_init() {
 	rx1.f.nblok = 2;
 	setTableTx(0, startPB, 16);
 //	setTableRx(0, startPB + 16, rxcnt(0, 8));
-	setTableRx(0, startPB + 16, RXCNT(0, 8));
+	setTableRx(0, startPB + 16, RXCNT(0, 4));
 	// list 1
-	setTableTx(1, startPB + 32, 64);
+	setTableTx(1, startPB + 24, 64);
 	setTableRx(2, startPB + 96, rx1.word);
 	USB->EPR[0] = (EP_CONTROL << 8);
 	USB->EPR[1] = (EP_BULK << 8) | 1;

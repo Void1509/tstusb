@@ -19,9 +19,17 @@
 #define VALID			3
 #define	STRX				12
 #define STTX				4
+#define SETUP			0x800
+#define DTOG_RX			0x4000
+#define DTOG_TX			0x40
+#define DIR				0x10
+#define CTR_RX			0x8000
+#define CTR_TX			0x80
+#define EP_KIND			0x100
+
 #define	RXCNT(bsize,nblock)		(uint16_t)(((bsize & 1) << 15) | ((nblock & 31) << 10))
 
-
+#pragma pack(push,1)
 typedef struct {
 	unsigned rec:5;
 	unsigned type:2;
@@ -35,7 +43,7 @@ typedef struct {
 	uint16_t wIndex;
 	uint16_t wLen;
 } USBReqestType;
-
+#pragma pack(pop)
 typedef struct {
 	uint32_t EPR[8];
 	uint32_t RESERVED[8];
@@ -92,4 +100,6 @@ void setTableRx(uint8_t inx, uint16_t addr, uint16_t count);
 uint16_t getTableTxAddr(uint8_t ep);
 uint16_t getTableRxAddr(uint8_t ep);
 uint16_t getTableRxCount(uint8_t ep);
+void setTxCount(uint8_t ep, uint16_t cnt);
+void setRxCount(uint8_t ep, uint16_t cnt);
 #endif /* USB_H_ */

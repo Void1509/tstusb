@@ -31,8 +31,10 @@
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #pragma GCC diagnostic ignored "-Wreturn-type"
 
-#define LED_SET		GPIOA->BSRR |= (1 << 5)
-#define LED_RES		GPIOA->BSRR |= (1 << 21)
+#define LED_PIN		0x100
+
+#define LED_OFF		GPIOB->BSRR |= LED_PIN
+#define LED_ON		GPIOB->BSRR |= (LED_PIN << 16)
 //void initialise_monitor_handles(void);
 void hw_init();
 
@@ -43,15 +45,15 @@ int main(int argc, char* argv[]) {
 	myDelay_init();
 	hw_init();
 //	NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
-	LED_SET;
+	LED_ON;
 	myDelay(3000);
-	LED_RES;
+	LED_OFF;
 //	printf("Hello Semi\n");
 //	trace_puts("Hello ARM World!");
 	// Infinite loop
 	usb_init();
 	while (1) {
-		if (GPIOC->IDR & (1 << 11)) LED_SET; else LED_RES;
+		if (GPIOC->IDR & (1 << 11)) LED_ON; else LED_OFF;
 		myDelay(1000);
 	}
 }

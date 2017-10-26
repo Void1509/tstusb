@@ -12,6 +12,7 @@ void hw_init() {
 	// USB CLK Init инициализация тактирования USB
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+	RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 	RCC_USBCLKConfig(RCC_USBCLKSource_PLLCLK_1Div5);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
@@ -24,6 +25,11 @@ void hw_init() {
 	io.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOA, &io);
 
+	// port B init (leds) open Drain
+	GPIOB->CRH |= 0x11;
+	GPIOB->ODR |= 0x300;
+
+/*
 	io.GPIO_Mode = GPIO_Mode_Out_PP;
 	io.GPIO_Pin = GPIO_Pin_5;
 	io.GPIO_Speed = GPIO_Speed_10MHz;
@@ -43,12 +49,7 @@ void hw_init() {
 	EXTI->IMR |= EXTI_IMR_MR11;
 	EXTI->RTSR |= EXTI_RTSR_TR11;
 	EXTI->FTSR |= EXTI_FTSR_TR11;
-
-	// IRQ enable
-//	NVIC_EnableIRQ(EXTI15_10_IRQn);
-//	USB->EP0R = USB_EP0R_EP_TYPE_0;
-//	PBuffer[0].mem = 0x100
-//	NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
+*/
 }
 void intToUni(uint32_t ui, uint8_t *buf, uint8_t len) {
 

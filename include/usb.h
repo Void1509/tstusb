@@ -8,12 +8,14 @@
 #ifndef USB_H_
 #define USB_H_
 
+#define EPCOUNT		3
 #define USB_BASE	((uint32_t)0x40005C00)
 #define USB_PBUFFER	((uint32_t)0x40006000)
 #define EP_BULK			0
 #define EP_CONTROL		0x200
 #define EP_ISO			0x400
 #define EP_INT			0x600
+#define SDIS				0
 #define STALL			1
 #define NAK				2
 #define VALID			3
@@ -93,7 +95,14 @@ typedef union {
 #ifdef MYUSBLIB
 extern BTable *table;
 extern PBElement *PBuffer;
+extern uint8_t DeviceDescriptor[];
+extern uint8_t ConfigDescriptor[];
+extern uint8_t StringLangID[];
+extern uint8_t StringVendor[];
+extern uint8_t StringProduct[];
+extern uint8_t StringSerial[];
 #endif
+
 void usb_init();
 void setTableTx(uint8_t inx, uint16_t addr, uint16_t count);
 void setTableRx(uint8_t inx, uint16_t addr, uint16_t count);
@@ -102,4 +111,14 @@ uint16_t getTableRxAddr(uint8_t ep);
 uint16_t getTableRxCount(uint8_t ep);
 void setTxCount(uint8_t ep, uint16_t cnt);
 void setRxCount(uint8_t ep, uint16_t cnt);
+void setEPType(uint8_t ep, uint16_t type);
+void setStatTx(uint8_t ep, uint16_t stat);
+void setStatRx(uint8_t ep, uint16_t stat);
+void clrCTR_tx(uint8_t ep);
+void clrCTR_rx(uint8_t ep);
+void toggleRx(uint8_t ep);
+void toggleTx(uint8_t ep);
+void usr2pma(uint8_t *src, uint16_t addr, uint16_t cnt);
+void pma2usr(uint8_t *dst, uint16_t addr, uint16_t cnt);
+
 #endif /* USB_H_ */

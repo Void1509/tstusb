@@ -27,7 +27,8 @@ src/main.o: ../src/main.c ../system/include/diag/Trace.h \
  ../system/include/stm32f1-stdperiph/stm32f10x_usart.h \
  ../system/include/stm32f1-stdperiph/stm32f10x_wwdg.h \
  ../system/include/stm32f1-stdperiph/misc.h \
- /Users/valeriy/Documents/workspace/machine2/mylibs/inc/myDelay.h
+ /Users/valeriy/Documents/workspace/machine2/mylibs/inc/myDelay.h \
+ ../include/usb.h
 
 ../system/include/diag/Trace.h:
 
@@ -92,3 +93,5 @@ src/main.o: ../src/main.c ../system/include/diag/Trace.h \
 ../system/include/stm32f1-stdperiph/misc.h:
 
 /Users/valeriy/Documents/workspace/machine2/mylibs/inc/myDelay.h:
+
+../include/usb.h:

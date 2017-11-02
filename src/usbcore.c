@@ -4,9 +4,15 @@
  *  Created on: 26 янв. 2017 г.
  *      Author: valeriy
  */
-#define MYUSBLIB
+
 #include "stm32f10x.h"
+
+#define MYUSBLIB
 #include "usb.h"
+
+#define SET_LINE_CODING	0x20
+#define GET_LINE_CODING	0x21
+#define SET_CONTROL_LINE_STATE	0x22
 
 #define 	DSETADDR		1
 #define	POST0		2
@@ -16,7 +22,7 @@ void ep_init();
 #pragma pack(push,1)
 union {
 	USBReqestType req;
-	uint8_t buf[4];
+	uint8_t buf[8];
 } reqBuf;
 #pragma pack(pop)
 struct {
@@ -24,22 +30,28 @@ struct {
 	uint8_t * baddr;		// buffer addres to TX (IN)
 	uint16_t count;		// count tx bytes
 } usbData;
+struct {
+	uint8_t	service;		// кто запрашивал чтение
+	uint8_t *baddr;
+	uint16_t count;
+} readData;
 
-const uint8_t *strdesc[]={StringLangID,StringVendor,StringProduct,StringSerial};
+uint8_t linecoding[8];
 
-static uint16_t stat,saveRXst, saveTXst, in_stat, bmap;
+const uint8_t *strdesc[] = { StringLangID, StringVendor, StringProduct,
+		StringSerial };
+
+static uint16_t stat, saveRXst, saveTXst, in_stat, bmap;
 void EP0Int();
 void getDesc();
-void getDeviceDesc(USBReqestType *ur);
-void getConfigDesc();
-void getStringDesc();
 void setup_process();
 void getConfig();
 void setConfig();
+void getStatus();
+void getdsc(uint8_t q);
 
 void usb_ctr_int() {
 	stat = USB->ISTR;
-//	pbufcpy(reqBuf.buf, 0);
 	switch (stat & 0xf) {
 	case 0:
 		saveRXst = (USB->EPR[0] & 0x3000) >> STRX;
@@ -47,6 +59,15 @@ void usb_ctr_int() {
 		EP0Int();
 		setStatRx(0, saveRXst);
 		setStatTx(0, saveTXst);
+		break;
+	case 1:
+		clrCTR_tx(1);
+		break;
+	case 3:
+		clrCTR_rx(3);
+		break;
+	default:
+		getdsc((stat & 0xf) | 0x80);
 		break;
 	}
 }
@@ -60,14 +81,21 @@ void usb_reset_int() {
 
 	ep_init();
 	in_stat = usbData.daddr = bmap = 0;
-//	lens[dcount++] = dcount;
+	setEPType(3,EP_BULK);
+	setStatRx(3,VALID);
 }
 void usb_sof_int() {
 	stat = USB->ISTR;
-//	lens[dcount++] = dcount;
 }
 void usb_esof_int() {
 	stat = USB->ISTR;
+}
+void post0tx() {
+	setTxCount(0, 0);
+	if (!(USB->EPR[0] & 0x40))
+		toggleTx(0);
+	saveTXst = VALID;
+	saveRXst = VALID;
 }
 void EP0Int() {
 	if (USB->ISTR & DIR) {
@@ -77,22 +105,24 @@ void EP0Int() {
 			setup_process();			// Получили пакет SETUP
 		} else {
 			// Получили пакет обычный
-			saveRXst = VALID;
-			if (usbData.baddr) {
+			if (getTableRxCount(0) == 0) {
+
 				saveRXst = VALID;
 				usbData.baddr = 0;
+				usbData.count = 0;
+			} else {
+				uint8_t s = readData.service;
+				switch (s) {
+					case SET_LINE_CODING:
+						pma2usr(linecoding, getTableRxAddr(0), readData.count);
+						readData.count = 0;
+						post0tx();
+						break;
+				}
 			}
 		}
 	} else {
 		clrCTR_tx(0);			// IN Process (TX)
-				/*
-				 if (usbData.count == 0x8000) {		// TX STALLed
-				 clrCTR_rx(0);
-				 saveTXst = NAK;
-				 saveRXst = VALID;
-				 return;
-				 }
-				 */
 		if (usbData.count & 0x3ff) { 	// Проверяем есть ли пакет для отправки
 			// Если да - отправляем
 			uint8_t tmp =
@@ -102,8 +132,6 @@ void EP0Int() {
 			usbData.baddr += tmp;
 			usbData.count -= tmp;
 			setTxCount(0, tmp);
-			//toggleTx(0);
-			in_stat += tmp;
 			saveRXst = NAK;
 			saveTXst = VALID;
 		} else {		// Если нет
@@ -125,15 +153,31 @@ void EP0Int() {
 	}
 }
 void setup_process() {
-	switch (reqBuf.req.bReq) {
+	uint8_t sw = reqBuf.req.bReq;
+	switch (sw) {
 	case 0:			// GET_STATUS
 		bmap |= 1;
+		getStatus();
 		break;
-	case 1:			// CLEAR_FEATURE
-		bmap |= 2;
-		break;
-	case 3:			// SET_FEATURE
-		bmap |= 3;
+	case 1:
+		if (reqBuf.req.wIndex) {
+			if (reqBuf.req.wIndex == 0x82) {
+				setEPType(2, EP_INT);
+				post0tx();
+			} else {
+				setEPType(reqBuf.req.wIndex & 0xf, EP_BULK);
+				if (reqBuf.req.wIndex & 0x80) {
+//					uint16_t bf = 0x0a0d;
+//					usr2pma((uint8_t*)&bf, getTableTxAddr(1), 2);
+					setTxCount(1, 0);
+					setStatTx(1, NAK);
+					post0tx();
+				} else {
+					setStatRx(3, VALID);
+					post0tx();
+				}
+			}
+		}
 		break;
 	case 5:			// SET_ADDRESS
 		bmap |= 8;
@@ -146,9 +190,6 @@ void setup_process() {
 		bmap |= 0x10;
 		getDesc();
 		break;
-	case 7:			// SET_DESCRIPTOR
-		bmap |= 0x20;
-		break;
 	case 8:			// GET_CONFIGURATION
 		bmap |= 0x40;
 		getConfig();
@@ -157,187 +198,83 @@ void setup_process() {
 		bmap |= 0x80;
 		setConfig();
 		break;
-	}
-}
-/*
-void EP0Interrupt() {
-	uint16_t tmp;
-	if (USB->ISTR & DIR) {      // OUT reqest
-		clrCTR_rx(0);
-		if (USB->EPR[0] & SETUP) {
-			pbufcpy(reqBuf.buf, 0);
-			switch (reqBuf.req.bReq) {
-			case 0:
-				bmap |= 1;
-				pbufcpy(reqBuf.buf, 0);
-				break;
-			case 1:
-				bmap |= 2;
-				pbufcpy(reqBuf.buf, 0);
-				break;
-			case 3:
-				bmap |= 4;
-				pbufcpy(reqBuf.buf, 0);
-				break;
-			case 5:
-				bmap |= 8;
-				usbData.daddr = reqBuf.req.wValue;
-				in_stat = DSETADDR;
-				setTxCount(0, 0);
-				saveTXst = VALID;
-				//saveRXst = STALL;
-				break;
-			case 6:
-				bmap |= 0x10;
-				getDesc();
-				break;
-			case 7:
-				bmap |= 0x20;
-				break;
-			case 8:
-				bmap |= 0x40;
-				break;
-			case 9:
-				bmap |= 0x80;
-				break;
-			}
-		} else {
-			tmp = getTableRxCount(0);
-			if (tmp) {
-				saveRXst = VALID;
-			} else {
-				saveRXst = VALID;
-				if (usbData.count)
-					saveTXst = VALID;
-			}
-			//pbufcpy(reqBuf.buf, 0);
-			clrCTR_rx(0);
-
-			 saveTXst = VALID;
-			 saveRXst = VALID;
-
-		}
-	} else { 				// IN Request
-//	if (USB->EPR[0] & CTR_TX){
-		bmap |= 0x100;
-		//clrCTR_tx(0);
-		switch (in_stat) {
-		case DSETADDR:
-			USB->DADDR = 0x80 | usbData.daddr;
-			saveRXst = VALID;
-			break;
-		case POST0:
+	case SET_LINE_CODING:
+		readData.service = SET_LINE_CODING;
+		readData.baddr = linecoding;
+		readData.count = reqBuf.req.wLen;
+		saveRXst = VALID;
+		break;
+	case GET_LINE_CODING:
+		usr2pma(linecoding, getTableTxAddr(0), reqBuf.req.wLen);
+		usbData.baddr = 0;
+		usbData.count = 0;
+		setTxCount(0, reqBuf.req.wLen);
+		saveTXst = VALID;
+		break;
+	case SET_CONTROL_LINE_STATE:
+//		setEPType(1,EP_BULK);
+//		setStatRx(1, VALID);
+		post0tx();
+		break;
+	default:
+		if (reqBuf.req.wLen == 0) {
+			usbData.count = 0;
 			setTxCount(0, 0);
-			saveRXst = VALID;
-			break;
-		case POSTDATA:
-			if (usbData.count == 0) {
-				saveRXst = VALID;
-				return;
-			}
-			if (usbData.count >= BUF0SIZE)
-				tmp = BUF0SIZE;
-			else
-				tmp = usbData.count;
-			userpbuf(usbData.baddr, getTableTxAddr(0), tmp);
 			saveTXst = VALID;
-
-			setTxCount(0, tmp);
-			usbData.count -= tmp;
-			usbData.baddr += tmp;
-			if (usbData.count == 0)
-				in_stat = POST0;
-			clrCTR_rx(0);
-			//saveRXst = VALID;
-			//toggleTx(0);
-			break;
-		}
+		} //else getdsc(sw);
+		break;
 	}
 }
-*/
+void getDescriptor(uint8_t *desc) {
+	uint16_t len = reqBuf.req.wLen;
+	uint16_t gsize = (len > BUF0SIZE) ? BUF0SIZE : len;
+	usr2pma(desc, getTableTxAddr(0), gsize);
+	usbData.baddr = &desc[gsize];
+	usbData.count = len - gsize;
+	setTxCount(0, gsize);
+	saveTXst = VALID;
+}
+void getdsc(uint8_t q) {
+	in_stat = q;
+
+	usbData.count = 0;
+	setTxCount(0, 0);
+	saveTXst = VALID;
+}
 void getDesc() {
 	uint8_t sw;
 	sw = reqBuf.req.wValue >> 8;
 	switch (sw) {
 	case 1:
-		getDeviceDesc(&reqBuf.req);
-//		lens[dcount++] = ur.wLen;
+		getDescriptor((uint8_t*) DeviceDescriptor);
 		break;
 	case 2:
-		getConfigDesc();
+		getDescriptor((uint8_t*) ConfigDescriptor);
 		break;
 	case 3:
-		getStringDesc();
+		getDescriptor((uint8_t*) strdesc[reqBuf.req.wValue & 0xff]);
+		break;
+	default:
+		getdsc(sw);
 		break;
 	}
 }
 void getConfig() {
 	uint8_t cfg = 1;
-	usr2pma(&cfg,getTableTxAddr(0),1);
-	setTxCount(0,1);
+	usr2pma(&cfg, getTableTxAddr(0), 1);
+	setTxCount(0, 1);
+	usbData.count = 0;
+	saveTXst = VALID;
+}
+void getStatus() {
+	uint16_t cfg = 1;
+	usr2pma((uint8_t*) &cfg, getTableTxAddr(0), 2);
+	setTxCount(0, 2);
 	usbData.count = 0;
 	saveTXst = VALID;
 }
 void setConfig() {
 	usbData.count = 0;
-	setTxCount(0,0);
+	setTxCount(0, 0);
 	saveTXst = VALID;
-}
-void getDeviceDesc(USBReqestType *ur) {
-
-	if (ur->wLen > BUF0SIZE) {
-//		userpbuf((uint8_t*) DeviceDescriptor, getTableTxAddr(0), BUF0SIZE);
-		usr2pma((uint8_t*) DeviceDescriptor, getTableTxAddr(0), BUF0SIZE);
-		usbData.baddr = &DeviceDescriptor[BUF0SIZE];
-		usbData.count = ur->wLen - BUF0SIZE;
-		setTxCount(0, BUF0SIZE);
-		saveTXst = VALID;
-	} else {
-//		userpbuf((uint8_t*) DeviceDescriptor, getTableTxAddr(0), ur->wLen);
-		usr2pma((uint8_t*) DeviceDescriptor, getTableTxAddr(0), ur->wLen);
-		usbData.count = 0;
-		setTxCount(0, ur->wLen);
-		saveTXst = VALID;
-		saveRXst = VALID;
-	}
-	/*
-	 usbData.baddr = &DeviceDescriptor[BUF0SIZE];
-	 usbData.count = ur->wLen - BUF0SIZE;
-	 in_stat = POSTDATA;
-	 setTxCount(0, BUF0SIZE);
-	 saveTXst = VALID;
-	 */
-
-}
-void getConfigDesc() {
-	uint16_t len = reqBuf.req.wLen;
-	uint16_t gsize = (len > BUF0SIZE)? BUF0SIZE:len;
-	usr2pma((uint8_t*) ConfigDescriptor, getTableTxAddr(0), gsize);
-	usbData.baddr = &ConfigDescriptor[gsize];
-	usbData.count = len - gsize;
-//	in_stat = POSTDATA;
-	setTxCount(0, gsize);
-	saveTXst = VALID;
-}
-void getStringDesc() {
-	uint8_t *sel;
-	uint8_t cnt;
-
-	sel = strdesc[reqBuf.req.wValue & 0xff];
-
-	cnt = sel[0];
-	if (cnt > BUF0SIZE) {
-		usr2pma((uint8_t*) sel, getTableTxAddr(0), BUF0SIZE);
-		usbData.baddr = &sel[BUF0SIZE];
-		usbData.count = cnt - BUF0SIZE;
-//		in_stat = POSTDATA;
-		setTxCount(0, BUF0SIZE);
-		saveTXst = VALID;
-	} else {
-		usr2pma((uint8_t*) sel, getTableTxAddr(0), cnt);
-//		in_stat = POST0;
-		setTxCount(0, cnt);
-		saveTXst = VALID;
-	}
-
 }

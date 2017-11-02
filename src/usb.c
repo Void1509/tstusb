@@ -6,7 +6,6 @@
  */
 #include "stm32f10x.h"
 #include "usb.h"
-#define EPCOUNT		3
 #define BLSIZE		0x8000
 
 void usb_ctr_int();
@@ -132,7 +131,8 @@ void tableInit() {
 	setTableTx(0, tstart, 16);
 	setTableRx(0, tstart + 16, RXCNT(0, 4));
 	setTableTx(1, tstart + 24, 16);
-	setTableRx(2, tstart + 40, RXCNT(0, 8));
+	setTableTx(2, tstart + 40, 8);
+	setTableRx(3, tstart + 48, RXCNT(0, 8));
 }
 
 void ep_init() {

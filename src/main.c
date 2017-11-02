@@ -10,6 +10,7 @@
 
 #include "stm32f10x.h"
 #include "myDelay.h"
+#include "usb.h"
 
 // ----------------------------------------------------------------------------
 //
@@ -31,10 +32,6 @@
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #pragma GCC diagnostic ignored "-Wreturn-type"
 
-#define LED_PIN		0x100
-
-#define LED_OFF		GPIOB->BSRR |= LED_PIN
-#define LED_ON		GPIOB->BSRR |= (LED_PIN << 16)
 //void initialise_monitor_handles(void);
 void hw_init();
 
@@ -45,9 +42,9 @@ int main(int argc, char* argv[]) {
 	myDelay_init();
 	hw_init();
 //	NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
-	LED_ON;
-	myDelay(3000);
-	LED_OFF;
+	LED_ON(8);
+	myDelay(2000);
+	LED_OFF(8);
 //	printf("Hello Semi\n");
 //	trace_puts("Hello ARM World!");
 	// Infinite loop

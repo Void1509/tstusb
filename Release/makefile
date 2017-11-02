@@ -49,7 +49,7 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 SECONDARY_FLASH += \
-tstusb.bin \
+tstusb.hex \
 
 SECONDARY_SIZE += \
 tstusb.siz \
@@ -66,9 +66,9 @@ tstusb.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
-tstusb.bin: tstusb.elf
+tstusb.hex: tstusb.elf
 	@echo 'Invoking: Cross ARM GNU Create Flash Image'
-	arm-none-eabi-objcopy -O binary "tstusb.elf"  "tstusb.bin"
+	arm-none-eabi-objcopy -O ihex "tstusb.elf"  "tstusb.hex"
 	@echo 'Finished building: $@'
 	@echo ' '
 

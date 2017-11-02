@@ -16,7 +16,7 @@ void ep_init();
 #pragma pack(push,1)
 union {
 	USBReqestType req;
-	uint16_t buf[4];
+	uint8_t buf[4];
 } reqBuf;
 #pragma pack(pop)
 struct {
@@ -24,48 +24,18 @@ struct {
 	uint8_t * baddr;		// buffer addres to TX (IN)
 	uint16_t count;		// count tx bytes
 } usbData;
-volatile uint16_t dcount = 0;
-volatile uint16_t stat,lens[128];
-static uint16_t saveRXst, saveTXst, in_stat, bmap;
-void EP0Interrupt();
+
+const uint8_t *strdesc[]={StringLangID,StringVendor,StringProduct,StringSerial};
+
+static uint16_t stat,saveRXst, saveTXst, in_stat, bmap;
+void EP0Int();
 void getDesc();
 void getDeviceDesc(USBReqestType *ur);
 void getConfigDesc();
 void getStringDesc();
-
-uint16_t *pbufcpy(uint16_t *dst, uint8_t ep) {
-	uint16_t * raddr = dst;
-	uint16_t addr = (getTableRxAddr(ep) >> 1);
-	uint16_t cnt = (getTableRxCount(ep) >> 1);
-	while (cnt--)
-		*(raddr++) = PBuffer[addr++].mem;
-	return dst;
-}
-void userpbuf(uint8_t *src, uint16_t addr, uint16_t cnt) {
-	uint16_t tmp, taddr;
-	taddr = addr >> 1;
-	cnt &= 0xfe;
-	while (cnt) {
-		tmp = *(src + 1);
-		tmp <<= 8;
-		tmp |= *src;
-		PBuffer[taddr++].mem = tmp;
-		src += 2;
-		cnt -= 2;
-	}
-}
-void pbufuser(uint8_t *dst, uint16_t addr, uint16_t cnt) {
-	uint16_t tmp, taddr;
-	taddr = addr >> 1;
-	cnt &= 0xfe;
-	while (cnt) {
-		tmp = PBuffer[taddr++].mem;
-		*(dst++) = tmp & 0xff;
-		tmp >>= 8;
-		*(dst++) = tmp & 0xff;
-		cnt -= 2;
-	}
-}
+void setup_process();
+void getConfig();
+void setConfig();
 
 void usb_ctr_int() {
 	stat = USB->ISTR;
@@ -74,7 +44,7 @@ void usb_ctr_int() {
 	case 0:
 		saveRXst = (USB->EPR[0] & 0x3000) >> STRX;
 		saveTXst = (USB->EPR[0] & 0x30) >> STTX;
-		EP0Interrupt();
+		EP0Int();
 		setStatRx(0, saveRXst);
 		setStatTx(0, saveTXst);
 		break;
@@ -90,7 +60,7 @@ void usb_reset_int() {
 
 	ep_init();
 	in_stat = usbData.daddr = bmap = 0;
-	lens[dcount++] = dcount;
+//	lens[dcount++] = dcount;
 }
 void usb_sof_int() {
 	stat = USB->ISTR;
@@ -99,6 +69,97 @@ void usb_sof_int() {
 void usb_esof_int() {
 	stat = USB->ISTR;
 }
+void EP0Int() {
+	if (USB->ISTR & DIR) {
+		clrCTR_rx(0);			// OUT Process (RX)
+		pma2usr(reqBuf.buf, getTableRxAddr(0), getTableRxCount(0));
+		if (USB->EPR[0] & SETUP) {
+			setup_process();			// Получили пакет SETUP
+		} else {
+			// Получили пакет обычный
+			saveRXst = VALID;
+			if (usbData.baddr) {
+				saveRXst = VALID;
+				usbData.baddr = 0;
+			}
+		}
+	} else {
+		clrCTR_tx(0);			// IN Process (TX)
+				/*
+				 if (usbData.count == 0x8000) {		// TX STALLed
+				 clrCTR_rx(0);
+				 saveTXst = NAK;
+				 saveRXst = VALID;
+				 return;
+				 }
+				 */
+		if (usbData.count & 0x3ff) { 	// Проверяем есть ли пакет для отправки
+			// Если да - отправляем
+			uint8_t tmp =
+					((usbData.count & 0x3ff) > BUF0SIZE) ?
+							BUF0SIZE : (usbData.count & 0x3ff);
+			usr2pma(usbData.baddr, getTableTxAddr(0), tmp);
+			usbData.baddr += tmp;
+			usbData.count -= tmp;
+			setTxCount(0, tmp);
+			//toggleTx(0);
+			in_stat += tmp;
+			saveRXst = NAK;
+			saveTXst = VALID;
+		} else {		// Если нет
+			if (((USB->DADDR & 0x7f) == 0) && (usbData.daddr)) {
+				// Проверяем установлен ли адрес устройства
+				// Если нет устанавливаем
+				USB->DADDR = 0x80 | usbData.daddr;
+				saveRXst = VALID;
+			} else {
+				// и отправляем нулевой пакет
+				setTxCount(0, 0);
+				if (!(USB->EPR[0] & 0x40))
+					toggleTx(0);
+				saveTXst = VALID;
+				saveRXst = VALID;
+			}
+		}
+
+	}
+}
+void setup_process() {
+	switch (reqBuf.req.bReq) {
+	case 0:			// GET_STATUS
+		bmap |= 1;
+		break;
+	case 1:			// CLEAR_FEATURE
+		bmap |= 2;
+		break;
+	case 3:			// SET_FEATURE
+		bmap |= 3;
+		break;
+	case 5:			// SET_ADDRESS
+		bmap |= 8;
+		usbData.daddr = reqBuf.req.wValue;
+		usbData.count &= 0xf000;
+		setTxCount(0, 0);
+		saveTXst = VALID;
+		break;
+	case 6:			// GET_DESCRIPTOR
+		bmap |= 0x10;
+		getDesc();
+		break;
+	case 7:			// SET_DESCRIPTOR
+		bmap |= 0x20;
+		break;
+	case 8:			// GET_CONFIGURATION
+		bmap |= 0x40;
+		getConfig();
+		break;
+	case 9:			// SET_CONFIGURATION
+		bmap |= 0x80;
+		setConfig();
+		break;
+	}
+}
+/*
 void EP0Interrupt() {
 	uint16_t tmp;
 	if (USB->ISTR & DIR) {      // OUT reqest
@@ -151,10 +212,10 @@ void EP0Interrupt() {
 			}
 			//pbufcpy(reqBuf.buf, 0);
 			clrCTR_rx(0);
-/*
-			saveTXst = VALID;
-			saveRXst = VALID;
-*/
+
+			 saveTXst = VALID;
+			 saveRXst = VALID;
+
 		}
 	} else { 				// IN Request
 //	if (USB->EPR[0] & CTR_TX){
@@ -193,16 +254,13 @@ void EP0Interrupt() {
 		}
 	}
 }
+*/
 void getDesc() {
-	USBReqestType ur;
 	uint8_t sw;
-
-	//pbufuser((uint8_t*) &ur, getTableRxAddr(0), getTableRxCount(0));
-	pma2usr((uint8_t*)&ur,getTableRxAddr(0),getTableRxCount(0));
-	sw = ur.wValue >> 8;
+	sw = reqBuf.req.wValue >> 8;
 	switch (sw) {
 	case 1:
-		getDeviceDesc(&ur);
+		getDeviceDesc(&reqBuf.req);
 //		lens[dcount++] = ur.wLen;
 		break;
 	case 2:
@@ -213,6 +271,18 @@ void getDesc() {
 		break;
 	}
 }
+void getConfig() {
+	uint8_t cfg = 1;
+	usr2pma(&cfg,getTableTxAddr(0),1);
+	setTxCount(0,1);
+	usbData.count = 0;
+	saveTXst = VALID;
+}
+void setConfig() {
+	usbData.count = 0;
+	setTxCount(0,0);
+	saveTXst = VALID;
+}
 void getDeviceDesc(USBReqestType *ur) {
 
 	if (ur->wLen > BUF0SIZE) {
@@ -220,52 +290,52 @@ void getDeviceDesc(USBReqestType *ur) {
 		usr2pma((uint8_t*) DeviceDescriptor, getTableTxAddr(0), BUF0SIZE);
 		usbData.baddr = &DeviceDescriptor[BUF0SIZE];
 		usbData.count = ur->wLen - BUF0SIZE;
-		in_stat = POSTDATA;
-		setTxCount(0,BUF0SIZE);
+		setTxCount(0, BUF0SIZE);
 		saveTXst = VALID;
 	} else {
 //		userpbuf((uint8_t*) DeviceDescriptor, getTableTxAddr(0), ur->wLen);
 		usr2pma((uint8_t*) DeviceDescriptor, getTableTxAddr(0), ur->wLen);
-		in_stat = POSTDATA;
 		usbData.count = 0;
-		setTxCount(0,ur->wLen);
+		setTxCount(0, ur->wLen);
 		saveTXst = VALID;
 		saveRXst = VALID;
 	}
-/*
-	usbData.baddr = &DeviceDescriptor[BUF0SIZE];
-	usbData.count = ur->wLen - BUF0SIZE;
-	in_stat = POSTDATA;
-	setTxCount(0, BUF0SIZE);
-	saveTXst = VALID;
-*/
+	/*
+	 usbData.baddr = &DeviceDescriptor[BUF0SIZE];
+	 usbData.count = ur->wLen - BUF0SIZE;
+	 in_stat = POSTDATA;
+	 setTxCount(0, BUF0SIZE);
+	 saveTXst = VALID;
+	 */
 
 }
 void getConfigDesc() {
-	userpbuf((uint8_t*) ConfigDescriptor, getTableTxAddr(0), BUF0SIZE);
-	usbData.baddr = &ConfigDescriptor[BUF0SIZE];
-	usbData.count = 32 - BUF0SIZE;
-	in_stat = POSTDATA;
-	setTxCount(0, BUF0SIZE);
+	uint16_t len = reqBuf.req.wLen;
+	uint16_t gsize = (len > BUF0SIZE)? BUF0SIZE:len;
+	usr2pma((uint8_t*) ConfigDescriptor, getTableTxAddr(0), gsize);
+	usbData.baddr = &ConfigDescriptor[gsize];
+	usbData.count = len - gsize;
+//	in_stat = POSTDATA;
+	setTxCount(0, gsize);
 	saveTXst = VALID;
 }
 void getStringDesc() {
 	uint8_t *sel;
 	uint8_t cnt;
 
-	sel = StringLangID;
+	sel = strdesc[reqBuf.req.wValue & 0xff];
 
 	cnt = sel[0];
 	if (cnt > BUF0SIZE) {
-		userpbuf((uint8_t*) sel, getTableTxAddr(0), BUF0SIZE);
+		usr2pma((uint8_t*) sel, getTableTxAddr(0), BUF0SIZE);
 		usbData.baddr = &sel[BUF0SIZE];
 		usbData.count = cnt - BUF0SIZE;
-		in_stat = POSTDATA;
+//		in_stat = POSTDATA;
 		setTxCount(0, BUF0SIZE);
 		saveTXst = VALID;
 	} else {
-		userpbuf((uint8_t*) sel, getTableTxAddr(0), cnt);
-		in_stat = POST0;
+		usr2pma((uint8_t*) sel, getTableTxAddr(0), cnt);
+//		in_stat = POST0;
 		setTxCount(0, cnt);
 		saveTXst = VALID;
 	}

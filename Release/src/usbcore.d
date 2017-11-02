@@ -26,7 +26,7 @@ src/usbcore.o: ../src/usbcore.c ../system/include/cmsis/stm32f10x.h \
  ../system/include/stm32f1-stdperiph/stm32f10x_tim.h \
  ../system/include/stm32f1-stdperiph/stm32f10x_usart.h \
  ../system/include/stm32f1-stdperiph/stm32f10x_wwdg.h \
- ../system/include/stm32f1-stdperiph/misc.h
+ ../system/include/stm32f1-stdperiph/misc.h ../include/usb.h
 
 ../system/include/cmsis/stm32f10x.h:
 
@@ -87,3 +87,5 @@ src/usbcore.o: ../src/usbcore.c ../system/include/cmsis/stm32f10x.h \
 ../system/include/stm32f1-stdperiph/stm32f10x_wwdg.h:
 
 ../system/include/stm32f1-stdperiph/misc.h:
+
+../include/usb.h:

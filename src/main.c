@@ -53,8 +53,8 @@ int main(int argc, char* argv[]) {
 	// Infinite loop
 	usb_init();
 	while (1) {
-		if (GPIOC->IDR & (1 << 11)) LED_ON; else LED_OFF;
-		myDelay(1000);
+//		if (GPIOC->IDR & (1 << 11)) LED_ON; else LED_OFF;
+//		myDelay(1000);
 	}
 }
 void EXTI15_10_IRQHandler() {

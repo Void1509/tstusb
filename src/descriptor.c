@@ -16,7 +16,7 @@ const uint8_t DeviceDescriptor[] =
     0x02,   /* bDeviceClass: CDC */
     0x00,   /* bDeviceSubClass */
     0x00,   /* bDeviceProtocol */
-    0x10,   /* bMaxPacketSize0 */
+    0x08,   /* bMaxPacketSize0 */
     0x83,
     0x04,   /* idVendor = 0x0483 */
     0x40,
@@ -43,7 +43,7 @@ const uint8_t ConfigDescriptor[] = {
 		0,
 		0,
 		2,		// endpoints
-		2,		// interface class
+		0x0a,		// interface class
 		2,		// interface subclass
 		1,		// interface protocol Common AT commands
 		0,		// interface string index
@@ -169,12 +169,12 @@ const uint8_t StringVendor[38] =
 
 const uint8_t StringProduct[50] =
   {
-    50,          /* bLength */
+    46,          /* bLength */
 	STRING_DT,        /* bDescriptorType */
     /* Product name: "STM32 Virtual COM Port" */
     'S', 0, 'T', 0, 'M', 0, '3', 0, '2', 0, ' ', 0, 'V', 0, 'i', 0,
     'r', 0, 't', 0, 'u', 0, 'a', 0, 'l', 0, ' ', 0, 'C', 0, 'O', 0,
-    'M', 0, ' ', 0, 'P', 0, 'o', 0, 'r', 0, 't', 0, ' ', 0, ' ', 0
+    'M', 0, ' ', 0, 'P', 0, 'o', 0, 'r', 0, 't', 0 //, ' ', 0, ' ', 0
   };
 
 const uint8_t StringSerial[26] =

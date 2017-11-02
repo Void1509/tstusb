@@ -25,7 +25,7 @@ PBElement *PBuffer = (PBElement*) USB_PBUFFER;
 void usb_init() {
 	intStat = 0;
 	NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
-	NVIC_EnableIRQ(USB_HP_CAN1_TX_IRQn);
+//	NVIC_EnableIRQ(USB_HP_CAN1_TX_IRQn);
 	USB->BTABLE = 0;
 	USB->DADDR = 0;
 	USB->CNTR = (1 << 10);
@@ -38,10 +38,10 @@ void setTableTx(uint8_t inx, uint16_t addr, uint16_t count) {
 	table[inx].tx.addr.mem = addr;
 	table[inx].tx.count.mem = count;
 }
-void setTxCount(uint8_t ep, uint16_t cnt) {
+inline void setTxCount(uint8_t ep, uint16_t cnt) {
 	table[ep].tx.count.mem = cnt;
 }
-uint16_t getTableTxAddr(uint8_t ep) {
+inline uint16_t getTableTxAddr(uint8_t ep) {
 	return (table[ep].tx.addr.mem);
 }
 
@@ -49,45 +49,54 @@ void setTableRx(uint8_t inx, uint16_t addr, uint16_t count) {
 	table[inx].rx.addr.mem = addr;
 	table[inx].rx.count.mem = count;
 }
-void setRxCount(uint8_t ep, uint16_t cnt) {
+inline void setRxCount(uint8_t ep, uint16_t cnt) {
 	table[ep].rx.count.mem = cnt;
 }
-uint16_t getTableRxAddr(uint8_t ep) {
+inline uint16_t getTableRxAddr(uint8_t ep) {
 	return (table[ep].rx.addr.mem);
 }
-uint16_t getTableRxCount(uint8_t ep) {
+inline uint16_t getTableRxCount(uint8_t ep) {
 	return ((table[ep].rx.count.mem) & 0x3ff);
 }
+/*
 uint16_t rxcnt(uint16_t bsize, uint16_t nblock) {
 	uint16_t tmp = ((bsize & 1) << 15) | ((nblock & 31) << 10);
 	return tmp;
 }
+*/
 
 void setEPType(uint8_t ep, uint16_t type) {
-	uint16_t tmp = USB->EPR[ep] & 0x1f;
+	register uint16_t tmp = USB->EPR[ep] & 0x10f;
 	tmp |= type | CTR_RX | CTR_TX;
 	USB->EPR[ep] = tmp;
 }
 void toggleRx(uint8_t ep) {
-	uint16_t tmp = USB->EPR[ep] & 0x7f;
+	register uint16_t tmp = USB->EPR[ep] & 0x70f;
 	tmp |= CTR_RX | CTR_TX | 0x4000;
 	USB->EPR[ep] = tmp;
 }
 void toggleTx(uint8_t ep) {
-	uint16_t tmp = USB->EPR[ep] & 0x7f;
+	register uint16_t tmp = USB->EPR[ep] & 0x70f;
 	tmp |= CTR_RX | CTR_TX | 0x40;
 	USB->EPR[ep] = tmp;
 }
 void setStatTx(uint8_t ep, uint16_t stat) {
-	uint16_t tmp = USB->EPR[ep] & 0x73f;
+	register uint16_t tmp = USB->EPR[ep] & 0x73f;
 	tmp ^= (stat << STTX);
 	USB->EPR[ep] = tmp | CTR_RX | CTR_TX;
 }
 void setStatRx(uint8_t ep, uint16_t stat) {
-	uint16_t tmp = USB->EPR[ep] & 0x370f;
+	register uint16_t tmp = USB->EPR[ep] & 0x370f;
 	tmp ^= (stat << STRX);
 	USB->EPR[ep] = tmp | CTR_RX | CTR_TX;
 }
+inline void clrCTR_rx(uint8_t ep) {
+	USB->EPR[ep] &= 0x78f;
+}
+inline void clrCTR_tx(uint8_t ep) {
+	USB->EPR[ep] &= 0x870f;
+}
+/*
 void clrCTR_rx(uint8_t ep) {
 	uint16_t tmp = USB->EPR[ep] & 0x78f;
 	USB->EPR[0] = tmp;
@@ -96,6 +105,7 @@ void clrCTR_tx(uint8_t ep) {
 	uint16_t tmp = USB->EPR[ep] & 0x870f;
 	USB->EPR[0] = tmp;
 }
+*/
 void usr2pma(uint8_t *src, uint16_t addr, uint16_t cnt) {
 	while (cnt--) {
 		if (addr & 1) {
@@ -169,13 +179,13 @@ void USB_LP_CAN1_RX0_IRQHandler() {
 		usb_pma_int();
 		return;
 	}
-	/*
-	 if (USB->ISTR & (1 << 13)) {
-	 usb_err_int();
-	 USB->ISTR = ~(1 << 13);
-	 return;
-	 }
-	 */
+
+	if (USB->ISTR & (1 << 13)) {
+		usb_err_int();
+		USB->ISTR = ~(1 << 13);
+		return;
+	}
+
 	if (USB->ISTR & (1 << 10)) {
 		USB->ISTR = ~(1 << 10);
 		usb_reset_int();

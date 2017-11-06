@@ -27,7 +27,16 @@ void usb_init() {
 	USB->DADDR = 0;
 	USB->CNTR = (1 << 10);
 	USB->ISTR = 0;
-	GPIOC->CRL |= GPIO_CRL_MODE7_1;
+//	GPIOC->CRL |= GPIO_CRL_MODE7_1;
+}
+void setkind() {
+	uint16_t tmp = USB->EPR[0] & 0x868f;
+	tmp |= 0x100;
+	USB->EPR[0] = tmp;
+}
+void clrkind() {
+	uint16_t tmp = USB->EPR[0] & 0x868f;
+	USB->EPR[0] = tmp;
 }
 void setTableTx(uint8_t inx, uint16_t addr, uint16_t count) {
 	table[inx].tx.addr.mem = addr;
@@ -111,11 +120,11 @@ void tableInit() {
 	setTableTx(0, tstart, 16);
 	setTableRx(0, tstart + 16, RXCNT(0, 4));
 
-	setTableTx(1, tstart + 24, 16);
+	setTableTx(1, tstart + 24, 64);			// IN 1 (81)
 
-	setTableTx(2, tstart + 40, 8);
+	setTableTx(2, tstart + 88, 8);			// IN 2 (82)
 
-	setTableRx(3, tstart + 48, RXCNT(1, 2));
+	setTableRx(3, tstart + 96, RXCNT(0, 4));		// OUT 3(3)
 }
 
 void ep_init() {

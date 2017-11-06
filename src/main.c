@@ -9,6 +9,7 @@
 #include "diag/Trace.h"
 
 #include "stm32f10x.h"
+#include "string.h"
 #include "myDelay.h"
 #include "usb.h"
 
@@ -39,19 +40,34 @@ int main(int argc, char* argv[]) {
 //	initialise_monitor_handles();
 	// At this stage the system clock should have already been configured
 	// at high speed.
+	uint8_t comm[16];
+	uint8_t tmp;
+
+
 	myDelay_init();
 	hw_init();
 //	NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
+/*
 	LED_ON(8);
 	myDelay(2000);
 	LED_OFF(8);
+*/
 //	printf("Hello Semi\n");
 //	trace_puts("Hello ARM World!");
 	// Infinite loop
 	usb_init();
 	while (1) {
+		if (getCommCount()) {
+			tmp = getCommBuff(comm);
+			comm[tmp] = 0;
+			if (!strcmp((const char*)comm,"q1\n")) LED_ON(9);
+			if (!strcmp((const char*)comm,"q0\n")) LED_OFF(9);
+			if (!strcmp((const char*)comm,"w1\n")) LED_ON(8);
+			if (!strcmp((const char*)comm,"w0\n")) LED_OFF(8);
+		}
+		myDelay(100);
+
 //		if (GPIOC->IDR & (1 << 11)) LED_ON; else LED_OFF;
-//		myDelay(1000);
 	}
 }
 void EXTI15_10_IRQHandler() {

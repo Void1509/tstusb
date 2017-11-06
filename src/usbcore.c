@@ -42,6 +42,8 @@ static struct {			// структура для чтения данных
 
 uint8_t linecoding[8];		// line coding параметры передачи данных
 
+static uint8_t readBuf[16];
+static uint8_t readcount = 0;
 static uint16_t DeviceAddress, saveTXst, saveRXst;
 
 const uint8_t *strdesc[] = { StringLangID, StringVendor, StringProduct,
@@ -55,6 +57,18 @@ void getConfig();
 void setConfig();
 void getStatus();
 void getdsc(uint8_t q);
+
+uint8_t getCommBuff(uint8_t *dst) {
+	uint8_t * tmp = readBuf;
+	uint8_t ctmp = readcount;
+	while (readcount--)
+		*(dst++) = *(tmp++);
+	readcount = 0;
+	return ctmp;
+}
+uint8_t getCommCount() {
+	return readcount;
+}
 
 void usb_ctr_int() {
 	stat = USB->ISTR;
@@ -71,6 +85,9 @@ void usb_ctr_int() {
 		break;
 	case 3:
 		clrCTR_rx(3);
+		pma2usr(readBuf, getTableRxAddr(3), getTableRxCount(3));
+		readcount = getTableRxCount(3);
+		setStatRx(3, VALID);
 		break;
 	default:
 		clrCTR_rx(3);
@@ -89,8 +106,9 @@ void usb_reset_int() {
 	ep_init();
 	in_stat = bmap = 0;
 	DeviceAddress = 0;
-	setEPType(3, EP_BULK);
-	setStatRx(3, VALID);
+	readcount = 0;
+	readData.count = 0;
+	writeData.count = 0;
 }
 void usb_sof_int() {
 	stat = USB->ISTR;
@@ -139,6 +157,9 @@ void EP0Interrupt() {
 			setTxCount(0, tmp);
 			saveTXst = VALID;
 		} else {
+			if (DeviceAddress && ((USB->DADDR & 0x7f) == 0)) {
+				USB->DADDR = 0x80 | DeviceAddress;
+			}
 			setTxCount(0, 0);
 			saveTXst = NAK;
 			saveRXst = VALID;
@@ -175,12 +196,16 @@ void setup_process() {
 		break;
 	case 5:			// SET_ADDRESS
 		bmap |= 8;
-//		usbData.daddr = reqBuf.req.wValue;
-//		usbData.count &= 0xf000;
 		DeviceAddress = reqBuf.req.wValue;
 		setTxCount(0, 0);
-		setStatTx(0, VALID);
-		USB->DADDR = 0x80 | reqBuf.req.wValue;
+//		setkind();
+//		setStatTx(0, VALID);
+		setEPType(1, EP_BULK);
+		setEPType(2, EP_INT);
+		setEPType(3, EP_BULK);
+		setStatTx(1, NAK);
+		setStatTx(2, SDIS);
+		setStatRx(3, VALID);
 		saveTXst = VALID;
 		saveRXst = VALID;
 		break;

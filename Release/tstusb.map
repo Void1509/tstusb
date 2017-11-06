@@ -4,6 +4,8 @@ Archive member included to satisfy reference by file (symbol)
                               ./system/src/newlib/_sbrk.o (__errno)
 /usr/local/gcc-arm-none-eabi-5_4-2016q3/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m/libg_nano.a(lib_a-impure.o)
                               /usr/local/gcc-arm-none-eabi-5_4-2016q3/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m/libg_nano.a(lib_a-errno.o) (_impure_ptr)
+/usr/local/gcc-arm-none-eabi-5_4-2016q3/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m/libg_nano.a(lib_a-strcmp.o)
+                              ./src/main.o (strcmp)
 
 Allocating common symbols
 Common symbol       size              file
@@ -269,6 +271,8 @@ Discarded input sections
  .text          0x0000000000000000        0x0 ./src/usb.o
  .data          0x0000000000000000        0x0 ./src/usb.o
  .bss           0x0000000000000000        0x0 ./src/usb.o
+ .text.setkind  0x0000000000000000       0x1c ./src/usb.o
+ .text.clrkind  0x0000000000000000       0x18 ./src/usb.o
  .text.setTableTx
                 0x0000000000000000       0x14 ./src/usb.o
  .text.setTableRx
@@ -298,6 +302,8 @@ Discarded input sections
                 0x0000000000000000        0x4 /usr/local/gcc-arm-none-eabi-5_4-2016q3/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m/libg_nano.a(lib_a-impure.o)
  .ARM.attributes
                 0x0000000000000000       0x2d /usr/local/gcc-arm-none-eabi-5_4-2016q3/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m/libg_nano.a(lib_a-impure.o)
+ .data          0x0000000000000000        0x0 /usr/local/gcc-arm-none-eabi-5_4-2016q3/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m/libg_nano.a(lib_a-strcmp.o)
+ .bss           0x0000000000000000        0x0 /usr/local/gcc-arm-none-eabi-5_4-2016q3/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m/libg_nano.a(lib_a-strcmp.o)
 
 Memory Configuration
 
@@ -355,7 +361,7 @@ END GROUP
                 0x0000000020004c00                __Main_Stack_Limit = (__stack - __Main_Stack_Size)
                 [!provide]                        PROVIDE (_Main_Stack_Limit, __Main_Stack_Limit)
                 0x0000000000000100                _Minimum_Stack_Size = 0x100
-                0x0000000020000074                PROVIDE (_Heap_Begin, _end_noinit)
+                0x0000000020000084                PROVIDE (_Heap_Begin, _end_noinit)
                 0x0000000020004c00                PROVIDE (_Heap_Limit, (__stack - __Main_Stack_Size))
 
 .isr_vector     0x0000000008000000      0x232
@@ -473,16 +479,16 @@ END GROUP
 
 .inits          0x0000000008000234       0x28
                 0x0000000008000234                __data_regions_array_start = .
-                0x0000000008000234        0x4 LONG 0x8000e34 LOADADDR (.data)
+                0x0000000008000234        0x4 LONG 0x8000f90 LOADADDR (.data)
                 0x0000000008000238        0x4 LONG 0x20000000 ADDR (.data)
                 0x000000000800023c        0x4 LONG 0x20000034 (ADDR (.data) + SIZEOF (.data))
-                0x0000000008000240        0x4 LONG 0x8000e34 LOADADDR (.data_CCMRAM)
+                0x0000000008000240        0x4 LONG 0x8000f90 LOADADDR (.data_CCMRAM)
                 0x0000000008000244        0x4 LONG 0x0 ADDR (.data_CCMRAM)
                 0x0000000008000248        0x4 LONG 0x0 (ADDR (.data_CCMRAM) + SIZEOF (.data_CCMRAM))
                 0x000000000800024c                __data_regions_array_end = .
                 0x000000000800024c                __bss_regions_array_start = .
                 0x000000000800024c        0x4 LONG 0x20000034 ADDR (.bss)
-                0x0000000008000250        0x4 LONG 0x20000074 (ADDR (.bss) + SIZEOF (.bss))
+                0x0000000008000250        0x4 LONG 0x20000084 (ADDR (.bss) + SIZEOF (.bss))
                 0x0000000008000254        0x4 LONG 0x0 ADDR (.bss_CCMRAM)
                 0x0000000008000258        0x4 LONG 0x0 (ADDR (.bss_CCMRAM) + SIZEOF (.bss_CCMRAM))
                 0x000000000800025c                __bss_regions_array_end = .
@@ -508,7 +514,7 @@ END GROUP
 .flashtext
  *(.flashtext .flashtext.*)
 
-.text           0x000000000800025c      0xbd7
+.text           0x000000000800025c      0xd33
  *(.text .text.*)
  .text.GPIO_Init
                 0x000000000800025c       0xa4 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
@@ -559,159 +565,169 @@ END GROUP
  .text.hw_init  0x0000000008000580       0x74 ./src/hw_init.o
                 0x0000000008000580                hw_init
  .text.startup.main
-                0x00000000080005f4       0x30 ./src/main.o
+                0x00000000080005f4       0x94 ./src/main.o
                 0x00000000080005f4                main
  .text.EXTI15_10_IRQHandler
-                0x0000000008000624       0x34 ./src/main.o
-                0x0000000008000624                EXTI15_10_IRQHandler
+                0x0000000008000688       0x34 ./src/main.o
+                0x0000000008000688                EXTI15_10_IRQHandler
  .text.usb_init
-                0x0000000008000658       0x3c ./src/usb.o
-                0x0000000008000658                usb_init
+                0x00000000080006bc       0x2c ./src/usb.o
+                0x00000000080006bc                usb_init
  .text.setTxCount
-                0x0000000008000694       0x10 ./src/usb.o
-                0x0000000008000694                setTxCount
+                0x00000000080006e8       0x10 ./src/usb.o
+                0x00000000080006e8                setTxCount
  .text.getTableTxAddr
-                0x00000000080006a4       0x10 ./src/usb.o
-                0x00000000080006a4                getTableTxAddr
+                0x00000000080006f8       0x10 ./src/usb.o
+                0x00000000080006f8                getTableTxAddr
  .text.getTableRxAddr
-                0x00000000080006b4       0x10 ./src/usb.o
-                0x00000000080006b4                getTableRxAddr
+                0x0000000008000708       0x10 ./src/usb.o
+                0x0000000008000708                getTableRxAddr
  .text.getTableRxCount
-                0x00000000080006c4       0x14 ./src/usb.o
-                0x00000000080006c4                getTableRxCount
+                0x0000000008000718       0x14 ./src/usb.o
+                0x0000000008000718                getTableRxCount
  .text.setEPType
-                0x00000000080006d8       0x22 ./src/usb.o
-                0x00000000080006d8                setEPType
+                0x000000000800072c       0x22 ./src/usb.o
+                0x000000000800072c                setEPType
  .text.toggleTx
-                0x00000000080006fa       0x20 ./src/usb.o
-                0x00000000080006fa                toggleTx
+                0x000000000800074e       0x20 ./src/usb.o
+                0x000000000800074e                toggleTx
  .text.setStatTx
-                0x000000000800071a       0x28 ./src/usb.o
-                0x000000000800071a                setStatTx
+                0x000000000800076e       0x28 ./src/usb.o
+                0x000000000800076e                setStatTx
  .text.setStatRx
-                0x0000000008000742       0x28 ./src/usb.o
-                0x0000000008000742                setStatRx
+                0x0000000008000796       0x28 ./src/usb.o
+                0x0000000008000796                setStatRx
  .text.clrCTR_rx
-                0x000000000800076a       0x18 ./src/usb.o
-                0x000000000800076a                clrCTR_rx
+                0x00000000080007be       0x18 ./src/usb.o
+                0x00000000080007be                clrCTR_rx
  .text.clrCTR_tx
-                0x0000000008000782       0x1c ./src/usb.o
-                0x0000000008000782                clrCTR_tx
- *fill*         0x000000000800079e        0x2 
- .text.usr2pma  0x00000000080007a0       0x4c ./src/usb.o
-                0x00000000080007a0                usr2pma
- .text.pma2usr  0x00000000080007ec       0x34 ./src/usb.o
-                0x00000000080007ec                pma2usr
+                0x00000000080007d6       0x1c ./src/usb.o
+                0x00000000080007d6                clrCTR_tx
+ *fill*         0x00000000080007f2        0x2 
+ .text.usr2pma  0x00000000080007f4       0x4c ./src/usb.o
+                0x00000000080007f4                usr2pma
+ .text.pma2usr  0x0000000008000840       0x34 ./src/usb.o
+                0x0000000008000840                pma2usr
  .text.tableInit
-                0x0000000008000820       0x34 ./src/usb.o
-                0x0000000008000820                tableInit
- .text.ep_init  0x0000000008000854       0x50 ./src/usb.o
-                0x0000000008000854                ep_init
+                0x0000000008000874       0x34 ./src/usb.o
+                0x0000000008000874                tableInit
+ .text.ep_init  0x00000000080008a8       0x50 ./src/usb.o
+                0x00000000080008a8                ep_init
  .text.USB_LP_CAN1_RX0_IRQHandler
-                0x00000000080008a4       0x70 ./src/usb.o
-                0x00000000080008a4                USB_LP_CAN1_RX0_IRQHandler
+                0x00000000080008f8       0x70 ./src/usb.o
+                0x00000000080008f8                USB_LP_CAN1_RX0_IRQHandler
  .text.USB_HP_CAN1_TX_IRQHandler
-                0x0000000008000914       0x24 ./src/usb.o
-                0x0000000008000914                USB_HP_CAN1_TX_IRQHandler
+                0x0000000008000968       0x24 ./src/usb.o
+                0x0000000008000968                USB_HP_CAN1_TX_IRQHandler
+ .text.getCommBuff
+                0x000000000800098c       0x2c ./src/usbcore.o
+                0x000000000800098c                getCommBuff
+ .text.getCommCount
+                0x00000000080009b8        0xc ./src/usbcore.o
+                0x00000000080009b8                getCommCount
  .text.usb_reset_int
-                0x0000000008000938       0x24 ./src/usbcore.o
-                0x0000000008000938                usb_reset_int
+                0x00000000080009c4       0x34 ./src/usbcore.o
+                0x00000000080009c4                usb_reset_int
  .text.usb_esof_int
-                0x000000000800095c        0x2 ./src/usbcore.o
-                0x000000000800095c                usb_esof_int
+                0x00000000080009f8        0x2 ./src/usbcore.o
+                0x00000000080009f8                usb_esof_int
  .text.usb_sof_int
-                0x000000000800095e        0x2 ./src/usbcore.o
-                0x000000000800095e                usb_sof_int
+                0x00000000080009fa        0x2 ./src/usbcore.o
+                0x00000000080009fa                usb_sof_int
  .text.usb_err_int
-                0x0000000008000960        0x2 ./src/usbcore.o
-                0x0000000008000960                usb_err_int
+                0x00000000080009fc        0x2 ./src/usbcore.o
+                0x00000000080009fc                usb_err_int
  .text.usb_pma_int
-                0x0000000008000962        0x2 ./src/usbcore.o
-                0x0000000008000962                usb_pma_int
- .text.post0tx  0x0000000008000964       0x30 ./src/usbcore.o
-                0x0000000008000964                post0tx
+                0x00000000080009fe        0x2 ./src/usbcore.o
+                0x00000000080009fe                usb_pma_int
+ .text.post0tx  0x0000000008000a00       0x30 ./src/usbcore.o
+                0x0000000008000a00                post0tx
  .text.getDescriptor
-                0x0000000008000994       0x48 ./src/usbcore.o
-                0x0000000008000994                getDescriptor
- .text.getdsc   0x00000000080009dc       0x20 ./src/usbcore.o
-                0x00000000080009dc                getdsc
- .text.getDesc  0x00000000080009fc       0x3c ./src/usbcore.o
-                0x00000000080009fc                getDesc
+                0x0000000008000a30       0x48 ./src/usbcore.o
+                0x0000000008000a30                getDescriptor
+ .text.getdsc   0x0000000008000a78       0x20 ./src/usbcore.o
+                0x0000000008000a78                getdsc
+ .text.getDesc  0x0000000008000a98       0x3c ./src/usbcore.o
+                0x0000000008000a98                getDesc
  .text.getConfig
-                0x0000000008000a38       0x3c ./src/usbcore.o
-                0x0000000008000a38                getConfig
+                0x0000000008000ad4       0x3c ./src/usbcore.o
+                0x0000000008000ad4                getConfig
  .text.getStatus
-                0x0000000008000a74       0x3c ./src/usbcore.o
-                0x0000000008000a74                getStatus
+                0x0000000008000b10       0x3c ./src/usbcore.o
+                0x0000000008000b10                getStatus
  .text.setConfig
-                0x0000000008000ab0       0x20 ./src/usbcore.o
-                0x0000000008000ab0                setConfig
+                0x0000000008000b4c       0x20 ./src/usbcore.o
+                0x0000000008000b4c                setConfig
  .text.setup_process
-                0x0000000008000ad0      0x148 ./src/usbcore.o
-                0x0000000008000ad0                setup_process
+                0x0000000008000b6c      0x190 ./src/usbcore.o
+                0x0000000008000b6c                setup_process
  .text.EP0Interrupt
-                0x0000000008000c18       0xf0 ./src/usbcore.o
-                0x0000000008000c18                EP0Interrupt
+                0x0000000008000cfc      0x108 ./src/usbcore.o
+                0x0000000008000cfc                EP0Interrupt
  .text.usb_ctr_int
-                0x0000000008000d08       0x60 ./src/usbcore.o
-                0x0000000008000d08                usb_ctr_int
+                0x0000000008000e04       0x9c ./src/usbcore.o
+                0x0000000008000e04                usb_ctr_int
+ .text          0x0000000008000ea0       0x14 /usr/local/gcc-arm-none-eabi-5_4-2016q3/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m/libg_nano.a(lib_a-strcmp.o)
+                0x0000000008000ea0                strcmp
  *(.rodata .rodata.* .constdata .constdata.*)
  .rodata.StringProduct
-                0x0000000008000d68       0x32 ./src/descriptor.o
-                0x0000000008000d68                StringProduct
+                0x0000000008000eb4       0x32 ./src/descriptor.o
+                0x0000000008000eb4                StringProduct
  .rodata.StringSerial
-                0x0000000008000d9a       0x1a ./src/descriptor.o
-                0x0000000008000d9a                StringSerial
+                0x0000000008000ee6       0x1a ./src/descriptor.o
+                0x0000000008000ee6                StringSerial
  .rodata.StringLangID
-                0x0000000008000db4        0x4 ./src/descriptor.o
-                0x0000000008000db4                StringLangID
+                0x0000000008000f00        0x4 ./src/descriptor.o
+                0x0000000008000f00                StringLangID
  .rodata.ConfigDescriptor
-                0x0000000008000db8       0x43 ./src/descriptor.o
-                0x0000000008000db8                ConfigDescriptor
+                0x0000000008000f04       0x43 ./src/descriptor.o
+                0x0000000008000f04                ConfigDescriptor
  .rodata.StringVendor
-                0x0000000008000dfb       0x26 ./src/descriptor.o
-                0x0000000008000dfb                StringVendor
+                0x0000000008000f47       0x26 ./src/descriptor.o
+                0x0000000008000f47                StringVendor
  .rodata.DeviceDescriptor
-                0x0000000008000e21       0x12 ./src/descriptor.o
-                0x0000000008000e21                DeviceDescriptor
+                0x0000000008000f6d       0x12 ./src/descriptor.o
+                0x0000000008000f6d                DeviceDescriptor
+ .rodata.str1.1
+                0x0000000008000f7f       0x10 ./src/main.o
  *(vtable)
  *(.eh_frame*)
  *(.glue_7)
- .glue_7        0x0000000008000e33        0x0 linker stubs
+ .glue_7        0x0000000008000f8f        0x0 linker stubs
  *(.glue_7t)
- .glue_7t       0x0000000008000e33        0x0 linker stubs
+ .glue_7t       0x0000000008000f8f        0x0 linker stubs
 
-.vfp11_veneer   0x0000000008000e34        0x0
- .vfp11_veneer  0x0000000008000e34        0x0 linker stubs
+.vfp11_veneer   0x0000000008000f90        0x0
+ .vfp11_veneer  0x0000000008000f90        0x0 linker stubs
 
-.v4_bx          0x0000000008000e34        0x0
- .v4_bx         0x0000000008000e34        0x0 linker stubs
+.v4_bx          0x0000000008000f90        0x0
+ .v4_bx         0x0000000008000f90        0x0 linker stubs
 
-.iplt           0x0000000008000e34        0x0
- .iplt          0x0000000008000e34        0x0 ./system/src/stm32f1-stdperiph/misc.o
+.iplt           0x0000000008000f90        0x0
+ .iplt          0x0000000008000f90        0x0 ./system/src/stm32f1-stdperiph/misc.o
 
-.rel.dyn        0x0000000008000e34        0x0
- .rel.iplt      0x0000000008000e34        0x0 ./system/src/stm32f1-stdperiph/misc.o
+.rel.dyn        0x0000000008000f90        0x0
+ .rel.iplt      0x0000000008000f90        0x0 ./system/src/stm32f1-stdperiph/misc.o
 
 .ARM.extab
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x0000000008000e34                . = ALIGN (0x4)
-                0x0000000008000e34                __exidx_start = .
+                0x0000000008000f90                . = ALIGN (0x4)
+                0x0000000008000f90                __exidx_start = .
 
 .ARM.exidx
  *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-                0x0000000008000e34                __exidx_end = .
-                0x0000000008000e34                . = ALIGN (0x4)
-                0x0000000008000e34                _etext = .
-                0x0000000008000e34                __etext = .
+                0x0000000008000f90                __exidx_end = .
+                0x0000000008000f90                . = ALIGN (0x4)
+                0x0000000008000f90                _etext = .
+                0x0000000008000f90                __etext = .
 
-.data_CCMRAM    0x0000000000000000        0x0 load address 0x0000000008000e34
+.data_CCMRAM    0x0000000000000000        0x0 load address 0x0000000008000f90
  FILL mask 0xff
  *(.data.CCMRAM .data.CCMRAM.*)
                 0x0000000000000000                . = ALIGN (0x4)
-                0x0000000008000e34                _sidata = LOADADDR (.data)
+                0x0000000008000f90                _sidata = LOADADDR (.data)
 
-.data           0x0000000020000000       0x34 load address 0x0000000008000e34
+.data           0x0000000020000000       0x34 load address 0x0000000008000f90
  FILL mask 0xff
                 0x0000000020000000                _sdata = .
                 0x0000000020000000                __data_start__ = .
@@ -736,13 +752,13 @@ END GROUP
                 0x0000000020000034                _edata = .
                 0x0000000020000034                __data_end__ = .
 
-.igot.plt       0x0000000020000034        0x0 load address 0x0000000008000e68
+.igot.plt       0x0000000020000034        0x0 load address 0x0000000008000fc4
  .igot.plt      0x0000000020000034        0x0 ./system/src/stm32f1-stdperiph/misc.o
 
 .bss_CCMRAM     0x0000000000000000        0x0
  *(.bss.CCMRAM .bss.CCMRAM.*)
 
-.bss            0x0000000020000034       0x40
+.bss            0x0000000020000034       0x50
                 0x0000000020000034                __bss_start__ = .
                 0x0000000020000034                _sbss = .
  *(.bss_begin .bss_begin.*)
@@ -757,40 +773,43 @@ END GROUP
  .bss.readData  0x0000000020000040        0xc ./src/usbcore.o
  .bss.writeData
                 0x000000002000004c        0xc ./src/usbcore.o
- .bss.bmap      0x0000000020000058        0x2 ./src/usbcore.o
- .bss.saveRXst  0x000000002000005a        0x2 ./src/usbcore.o
- .bss.saveTXst  0x000000002000005c        0x2 ./src/usbcore.o
+ .bss.readBuf   0x0000000020000058       0x10 ./src/usbcore.o
+ .bss.DeviceAddress
+                0x0000000020000068        0x2 ./src/usbcore.o
+ .bss.bmap      0x000000002000006a        0x2 ./src/usbcore.o
+ .bss.saveRXst  0x000000002000006c        0x2 ./src/usbcore.o
+ .bss.saveTXst  0x000000002000006e        0x2 ./src/usbcore.o
+ .bss.readcount
+                0x0000000020000070        0x1 ./src/usbcore.o
  *(COMMON)
- COMMON         0x000000002000005e        0x1 ./src_lib/delay.o
-                0x000000002000005e                denois
- *fill*         0x000000002000005f        0x1 
- COMMON         0x0000000020000060        0x2 ./src/usb.o
-                0x0000000020000060                intStat
- COMMON         0x0000000020000062       0x10 ./src/usbcore.o
-                0x0000000020000062                linecoding
-                0x000000002000006a                reqBuf
+ COMMON         0x0000000020000071        0x1 ./src_lib/delay.o
+                0x0000000020000071                denois
+ COMMON         0x0000000020000072        0x2 ./src/usb.o
+                0x0000000020000072                intStat
+ COMMON         0x0000000020000074       0x10 ./src/usbcore.o
+                0x0000000020000074                linecoding
+                0x000000002000007c                reqBuf
  *(.bss_end .bss_end.*)
-                0x0000000020000074                . = ALIGN (0x4)
- *fill*         0x0000000020000072        0x2 
-                0x0000000020000074                __bss_end__ = .
-                0x0000000020000074                _ebss = .
+                0x0000000020000084                . = ALIGN (0x4)
+                0x0000000020000084                __bss_end__ = .
+                0x0000000020000084                _ebss = .
 
 .noinit_CCMRAM
  *(.noinit.CCMRAM .noinit.CCMRAM.*)
 
-.noinit         0x0000000020000074        0x0
-                0x0000000020000074                _noinit = .
+.noinit         0x0000000020000084        0x0
+                0x0000000020000084                _noinit = .
  *(.noinit .noinit.*)
-                0x0000000020000074                . = ALIGN (0x4)
-                0x0000000020000074                _end_noinit = .
+                0x0000000020000084                . = ALIGN (0x4)
+                0x0000000020000084                _end_noinit = .
                 [!provide]                        PROVIDE (end, _end_noinit)
                 [!provide]                        PROVIDE (_end, _end_noinit)
                 [!provide]                        PROVIDE (__end, _end_noinit)
                 [!provide]                        PROVIDE (__end__, _end_noinit)
 
-._check_stack   0x0000000020000074      0x100
-                0x0000000020000174                . = (. + _Minimum_Stack_Size)
- *fill*         0x0000000020000074      0x100 
+._check_stack   0x0000000020000084      0x100
+                0x0000000020000184                . = (. + _Minimum_Stack_Size)
+ *fill*         0x0000000020000084      0x100 
 
 .b1text
  *(.b1text)
@@ -856,7 +875,7 @@ END GROUP
  .comment       0x000000000000006e       0x6f ./src/usbcore.o
 
 .ARM.attributes
-                0x0000000000000000       0x33
+                0x0000000000000000       0x31
  .ARM.attributes
                 0x0000000000000000       0x33 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
  .ARM.attributes
@@ -889,6 +908,8 @@ END GROUP
                 0x00000000000002ca       0x33 ./src/usb.o
  .ARM.attributes
                 0x00000000000002fd       0x33 ./src/usbcore.o
+ .ARM.attributes
+                0x0000000000000330       0x1b /usr/local/gcc-arm-none-eabi-5_4-2016q3/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m/libg_nano.a(lib_a-strcmp.o)
 
 .debug
  *(.debug)
@@ -902,7 +923,7 @@ END GROUP
 .debug_sfnames
  *(.debug_sfnames)
 
-.debug_aranges  0x0000000000000000      0x548
+.debug_aranges  0x0000000000000000      0x568
  *(.debug_aranges)
  .debug_aranges
                 0x0000000000000000       0xa8 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
@@ -933,14 +954,14 @@ END GROUP
  .debug_aranges
                 0x00000000000003e8       0x28 ./src/main.o
  .debug_aranges
-                0x0000000000000410       0xc0 ./src/usb.o
+                0x0000000000000410       0xd0 ./src/usb.o
  .debug_aranges
-                0x00000000000004d0       0x78 ./src/usbcore.o
+                0x00000000000004e0       0x88 ./src/usbcore.o
 
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x0000000000000000     0x4662
+.debug_info     0x0000000000000000     0x48ab
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x0000000000000000      0x7c7 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
  .debug_info    0x00000000000007c7      0x8af ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
@@ -955,11 +976,11 @@ END GROUP
  .debug_info    0x0000000000002468      0x66e ./src_lib/delay.o
  .debug_info    0x0000000000002ad6      0x17b ./src/descriptor.o
  .debug_info    0x0000000000002c51      0x3c2 ./src/hw_init.o
- .debug_info    0x0000000000003013      0x248 ./src/main.o
- .debug_info    0x000000000000325b      0xaf1 ./src/usb.o
- .debug_info    0x0000000000003d4c      0x916 ./src/usbcore.o
+ .debug_info    0x0000000000003013      0x338 ./src/main.o
+ .debug_info    0x000000000000334b      0xaca ./src/usb.o
+ .debug_info    0x0000000000003e15      0xa96 ./src/usbcore.o
 
-.debug_abbrev   0x0000000000000000     0x162e
+.debug_abbrev   0x0000000000000000     0x1681
  *(.debug_abbrev)
  .debug_abbrev  0x0000000000000000      0x200 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
  .debug_abbrev  0x0000000000000200      0x1e4 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
@@ -974,11 +995,11 @@ END GROUP
  .debug_abbrev  0x0000000000000bfd      0x1ca ./src_lib/delay.o
  .debug_abbrev  0x0000000000000dc7       0x75 ./src/descriptor.o
  .debug_abbrev  0x0000000000000e3c      0x176 ./src/hw_init.o
- .debug_abbrev  0x0000000000000fb2      0x109 ./src/main.o
- .debug_abbrev  0x00000000000010bb      0x2e0 ./src/usb.o
- .debug_abbrev  0x000000000000139b      0x293 ./src/usbcore.o
+ .debug_abbrev  0x0000000000000fb2      0x144 ./src/main.o
+ .debug_abbrev  0x00000000000010f6      0x2c4 ./src/usb.o
+ .debug_abbrev  0x00000000000013ba      0x2c7 ./src/usbcore.o
 
-.debug_line     0x0000000000000000     0x1928
+.debug_line     0x0000000000000000     0x19f1
  *(.debug_line)
  .debug_line    0x0000000000000000      0x2ed ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
  .debug_line    0x00000000000002ed      0x3c3 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
@@ -993,11 +1014,11 @@ END GROUP
  .debug_line    0x0000000000000eca      0x19d ./src_lib/delay.o
  .debug_line    0x0000000000001067       0xb6 ./src/descriptor.o
  .debug_line    0x000000000000111d      0x14f ./src/hw_init.o
- .debug_line    0x000000000000126c      0x192 ./src/main.o
- .debug_line    0x00000000000013fe      0x2d1 ./src/usb.o
- .debug_line    0x00000000000016cf      0x259 ./src/usbcore.o
+ .debug_line    0x000000000000126c      0x1fb ./src/main.o
+ .debug_line    0x0000000000001467      0x2ea ./src/usb.o
+ .debug_line    0x0000000000001751      0x2a0 ./src/usbcore.o
 
-.debug_frame    0x0000000000000000      0xaa8
+.debug_frame    0x0000000000000000      0xb18
  *(.debug_frame)
  .debug_frame   0x0000000000000000      0x170 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
  .debug_frame   0x0000000000000170      0x220 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
@@ -1012,45 +1033,46 @@ END GROUP
  .debug_frame   0x0000000000000634       0x68 ./src_lib/delay.o
  .debug_frame   0x000000000000069c       0x44 ./src/hw_init.o
  .debug_frame   0x00000000000006e0       0x38 ./src/main.o
- .debug_frame   0x0000000000000718      0x1b8 ./src/usb.o
- .debug_frame   0x00000000000008d0      0x1d8 ./src/usbcore.o
+ .debug_frame   0x0000000000000718      0x1d8 ./src/usb.o
+ .debug_frame   0x00000000000008f0      0x208 ./src/usbcore.o
+ .debug_frame   0x0000000000000af8       0x20 /usr/local/gcc-arm-none-eabi-5_4-2016q3/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m/libg_nano.a(lib_a-strcmp.o)
 
-.debug_str      0x0000000000000000     0x1629
+.debug_str      0x0000000000000000     0x1671
  *(.debug_str)
- .debug_str     0x0000000000000000      0x53e ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
+ .debug_str     0x0000000000000000      0x536 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
                                         0x583 (size before relaxing)
- .debug_str     0x000000000000053e      0x42a ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
+ .debug_str     0x0000000000000536      0x42a ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
                                         0x66d (size before relaxing)
- .debug_str     0x0000000000000968       0x56 ./system/src/newlib/_exit.o
+ .debug_str     0x0000000000000960       0x56 ./system/src/newlib/_exit.o
                                         0x1ea (size before relaxing)
- .debug_str     0x00000000000009be      0x173 ./system/src/newlib/_startup.o
+ .debug_str     0x00000000000009b6      0x16d ./system/src/newlib/_startup.o
                                         0x32f (size before relaxing)
- .debug_str     0x0000000000000b31       0x5c ./system/src/newlib/_syscalls.o
+ .debug_str     0x0000000000000b23       0x5c ./system/src/newlib/_syscalls.o
                                         0x21f (size before relaxing)
- .debug_str     0x0000000000000b8d       0xb2 ./system/src/cortexm/_initialize_hardware.o
+ .debug_str     0x0000000000000b7f       0xb2 ./system/src/cortexm/_initialize_hardware.o
                                         0x2a3 (size before relaxing)
- .debug_str     0x0000000000000c3f       0x45 ./system/src/cortexm/_reset_hardware.o
+ .debug_str     0x0000000000000c31       0x45 ./system/src/cortexm/_reset_hardware.o
                                         0x269 (size before relaxing)
- .debug_str     0x0000000000000c84      0x11f ./system/src/cortexm/exception_handlers.o
+ .debug_str     0x0000000000000c76      0x11f ./system/src/cortexm/exception_handlers.o
                                         0x2dd (size before relaxing)
- .debug_str     0x0000000000000da3       0x77 ./system/src/cmsis/system_stm32f10x.o
+ .debug_str     0x0000000000000d95       0x77 ./system/src/cmsis/system_stm32f10x.o
                                         0x337 (size before relaxing)
- .debug_str     0x0000000000000e1a       0x57 ./system/src/cmsis/vectors_stm32f10x.o
+ .debug_str     0x0000000000000e0c       0x57 ./system/src/cmsis/vectors_stm32f10x.o
                                         0x1e6 (size before relaxing)
- .debug_str     0x0000000000000e71      0x3fe ./src_lib/delay.o
+ .debug_str     0x0000000000000e63      0x3fe ./src_lib/delay.o
                                         0x63f (size before relaxing)
- .debug_str     0x000000000000126f       0x6b ./src/descriptor.o
+ .debug_str     0x0000000000001261       0x6b ./src/descriptor.o
                                         0x217 (size before relaxing)
- .debug_str     0x00000000000012da       0x22 ./src/hw_init.o
+ .debug_str     0x00000000000012cc       0x22 ./src/hw_init.o
                                         0x394 (size before relaxing)
- .debug_str     0x00000000000012fc       0x5e ./src/main.o
-                                        0x25f (size before relaxing)
- .debug_str     0x000000000000135a      0x1be ./src/usb.o
-                                        0x6f1 (size before relaxing)
- .debug_str     0x0000000000001518      0x111 ./src/usbcore.o
-                                        0x41a (size before relaxing)
+ .debug_str     0x00000000000012ee       0x8d ./src/main.o
+                                        0x296 (size before relaxing)
+ .debug_str     0x000000000000137b      0x1ce ./src/usb.o
+                                        0x6ea (size before relaxing)
+ .debug_str     0x0000000000001549      0x128 ./src/usbcore.o
+                                        0x44a (size before relaxing)
 
-.debug_loc      0x0000000000000000     0x16fb
+.debug_loc      0x0000000000000000     0x1823
  *(.debug_loc)
  .debug_loc     0x0000000000000000      0x4ed ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
  .debug_loc     0x00000000000004ed      0x672 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
@@ -1060,9 +1082,9 @@ END GROUP
  .debug_loc     0x0000000000000e17       0x99 ./system/src/cmsis/system_stm32f10x.o
  .debug_loc     0x0000000000000eb0       0x88 ./src_lib/delay.o
  .debug_loc     0x0000000000000f38       0x77 ./src/hw_init.o
- .debug_loc     0x0000000000000faf       0x42 ./src/main.o
- .debug_loc     0x0000000000000ff1      0x577 ./src/usb.o
- .debug_loc     0x0000000000001568      0x193 ./src/usbcore.o
+ .debug_loc     0x0000000000000faf       0x55 ./src/main.o
+ .debug_loc     0x0000000000001004      0x5d7 ./src/usb.o
+ .debug_loc     0x00000000000015db      0x248 ./src/usbcore.o
 
 .debug_macinfo
  *(.debug_macinfo)
@@ -1080,7 +1102,7 @@ END GROUP
  *(.debug_varnames)
 OUTPUT(tstusb.elf elf32-littlearm)
 
-.debug_ranges   0x0000000000000000      0x570
+.debug_ranges   0x0000000000000000      0x5a8
  .debug_ranges  0x0000000000000000       0x98 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
  .debug_ranges  0x0000000000000098      0x108 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
  .debug_ranges  0x00000000000001a0       0x18 ./system/src/newlib/_exit.o
@@ -1094,5 +1116,5 @@ OUTPUT(tstusb.elf elf32-littlearm)
  .debug_ranges  0x00000000000002f8       0x60 ./src_lib/delay.o
  .debug_ranges  0x0000000000000358       0x18 ./src/hw_init.o
  .debug_ranges  0x0000000000000370       0x18 ./src/main.o
- .debug_ranges  0x0000000000000388      0x168 ./src/usb.o
- .debug_ranges  0x00000000000004f0       0x80 ./src/usbcore.o
+ .debug_ranges  0x0000000000000388      0x190 ./src/usb.o
+ .debug_ranges  0x0000000000000518       0x90 ./src/usbcore.o

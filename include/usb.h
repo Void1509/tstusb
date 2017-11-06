@@ -122,5 +122,8 @@ uint16_t getTableRxAddr(uint8_t ep);
 uint16_t getTableRxCount(uint8_t ep);
 void usr2pma(uint8_t *src, uint16_t addr, uint16_t cnt);
 void pma2usr(uint8_t *dst, uint16_t addr, uint16_t cnt);
-
+uint8_t getCommBuff(uint8_t *dst);
+uint8_t getCommCount();
+void setkind();
+void clrkind();
 #endif /* USB_H_ */

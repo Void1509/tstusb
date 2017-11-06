@@ -19,19 +19,15 @@ volatile uint16_t intStat;
 
 BTable *table = (BTable*) USB_PBUFFER;
 PBElement *PBuffer = (PBElement*) USB_PBUFFER;
-//volatile RXCount rx1;
 
 void usb_init() {
 	intStat = 0;
 	NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
-//	NVIC_EnableIRQ(USB_HP_CAN1_TX_IRQn);
 	USB->BTABLE = 0;
 	USB->DADDR = 0;
 	USB->CNTR = (1 << 10);
 	USB->ISTR = 0;
 	GPIOC->CRL |= GPIO_CRL_MODE7_1;
-//	USB->DADDR = 0x80;
-//	USB_CNTR_CTRM;
 }
 void setTableTx(uint8_t inx, uint16_t addr, uint16_t count) {
 	table[inx].tx.addr.mem = addr;
@@ -57,12 +53,6 @@ inline uint16_t getTableRxAddr(uint8_t ep) {
 inline uint16_t getTableRxCount(uint8_t ep) {
 	return ((table[ep].rx.count.mem) & 0x3ff);
 }
-/*
-uint16_t rxcnt(uint16_t bsize, uint16_t nblock) {
-	uint16_t tmp = ((bsize & 1) << 15) | ((nblock & 31) << 10);
-	return tmp;
-}
-*/
 
 void setEPType(uint8_t ep, uint16_t type) {
 	register uint16_t tmp = USB->EPR[ep] & 0x10f;
@@ -95,16 +85,6 @@ inline void clrCTR_rx(uint8_t ep) {
 inline void clrCTR_tx(uint8_t ep) {
 	USB->EPR[ep] &= 0x870f;
 }
-/*
-void clrCTR_rx(uint8_t ep) {
-	uint16_t tmp = USB->EPR[ep] & 0x78f;
-	USB->EPR[0] = tmp;
-}
-void clrCTR_tx(uint8_t ep) {
-	uint16_t tmp = USB->EPR[ep] & 0x870f;
-	USB->EPR[0] = tmp;
-}
-*/
 void usr2pma(uint8_t *src, uint16_t addr, uint16_t cnt) {
 	while (cnt--) {
 		if (addr & 1) {
@@ -130,9 +110,12 @@ void tableInit() {
 	uint16_t tstart = EPCOUNT << 3;
 	setTableTx(0, tstart, 16);
 	setTableRx(0, tstart + 16, RXCNT(0, 4));
+
 	setTableTx(1, tstart + 24, 16);
+
 	setTableTx(2, tstart + 40, 8);
-	setTableRx(3, tstart + 48, RXCNT(0, 8));
+
+	setTableRx(3, tstart + 48, RXCNT(1, 2));
 }
 
 void ep_init() {
@@ -150,24 +133,6 @@ void ep_init() {
 	setStatRx(0, VALID);
 	USB->DADDR = 0x80;
 }
-
-/*
- static void IntToUnicode(uint32_t value, uint8_t *pbuf, uint8_t len) {
- uint8_t idx = 0;
-
- for (idx = 0; idx < len; idx++) {
- if (((value >> 28)) < 0xA) {
- pbuf[2 * idx] = (value >> 28) + '0';
- } else {
- pbuf[2 * idx] = (value >> 28) + 'A' - 10;
- }
-
- value = value << 4;
-
- pbuf[2 * idx + 1] = 0;
- }
- }
- */
 
 void USB_LP_CAN1_RX0_IRQHandler() {
 	if (USB->ISTR & (1 << 15)) {

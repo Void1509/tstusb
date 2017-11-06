@@ -79,7 +79,7 @@ const uint8_t ConfigDescriptor[] = { 9, 2, 67, 00, 2, 1, 0, 0xc0, 0x32,
 		2, 16, 00, 00,
 
 		7,		// endpoint OUT
-		5, 3, 2, 16, 00, 00 };
+		5, 3, 2, 64, 00, 00 };
 /*
  const uint8_t Virtual_Com_Port_ConfigDescriptor[] =
  {

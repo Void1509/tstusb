@@ -14,6 +14,8 @@
 #define GET_LINE_CODING	0x21
 #define SET_CONTROL_LINE_STATE	0x22
 
+#define EP0		USB->EPR[0]
+
 #define 	DSETADDR		1
 #define	POST0		2
 #define	POSTDATA		3
@@ -25,24 +27,28 @@ union {
 	uint8_t buf[8];
 } reqBuf;
 #pragma pack(pop)
-struct {
-	uint16_t daddr;		// device addr
-	uint8_t * baddr;		// buffer addres to TX (IN)
-	uint16_t count;		// count tx bytes
-} usbData;
-struct {
-	uint8_t	service;		// кто запрашивал чтение
+
+static struct {			// структура для передачи данных
+	uint8_t service;		// кто запрашивал запись
+	uint8_t *baddr;
+	uint16_t count;
+} writeData;
+
+static struct {			// структура для чтения данных
+	uint8_t service;		// кто запрашивал чтение
 	uint8_t *baddr;
 	uint16_t count;
 } readData;
 
-uint8_t linecoding[8];
+uint8_t linecoding[8];		// line coding параметры передачи данных
+
+static uint16_t DeviceAddress, saveTXst, saveRXst;
 
 const uint8_t *strdesc[] = { StringLangID, StringVendor, StringProduct,
 		StringSerial };
 
-static uint16_t stat, saveRXst, saveTXst, in_stat, bmap;
-void EP0Int();
+static uint16_t stat, in_stat, bmap;
+void EP0Interrupt();
 void getDesc();
 void setup_process();
 void getConfig();
@@ -56,7 +62,7 @@ void usb_ctr_int() {
 	case 0:
 		saveRXst = (USB->EPR[0] & 0x3000) >> STRX;
 		saveTXst = (USB->EPR[0] & 0x30) >> STTX;
-		EP0Int();
+		EP0Interrupt();
 		setStatRx(0, saveRXst);
 		setStatTx(0, saveTXst);
 		break;
@@ -67,7 +73,8 @@ void usb_ctr_int() {
 		clrCTR_rx(3);
 		break;
 	default:
-		getdsc((stat & 0xf) | 0x80);
+		clrCTR_rx(3);
+//		getdsc((stat & 0xf) | 0x80);
 		break;
 	}
 }
@@ -80,9 +87,10 @@ void usb_err_int() {
 void usb_reset_int() {
 
 	ep_init();
-	in_stat = usbData.daddr = bmap = 0;
-	setEPType(3,EP_BULK);
-	setStatRx(3,VALID);
+	in_stat = bmap = 0;
+	DeviceAddress = 0;
+	setEPType(3, EP_BULK);
+	setStatRx(3, VALID);
 }
 void usb_sof_int() {
 	stat = USB->ISTR;
@@ -97,61 +105,47 @@ void post0tx() {
 	saveTXst = VALID;
 	saveRXst = VALID;
 }
-void EP0Int() {
+void EP0Interrupt() {
 	if (USB->ISTR & DIR) {
-		clrCTR_rx(0);			// OUT Process (RX)
-		pma2usr(reqBuf.buf, getTableRxAddr(0), getTableRxCount(0));
-		if (USB->EPR[0] & SETUP) {
-			setup_process();			// Получили пакет SETUP
+		clrCTR_rx(0);			//  прием данных
+		if (EP0& SETUP) {
+			pma2usr(reqBuf.buf, getTableRxAddr(0), getTableRxCount(0));
+			setup_process();
 		} else {
-			// Получили пакет обычный
-			if (getTableRxCount(0) == 0) {
-
+			if (!getTableRxCount(0)) {
 				saveRXst = VALID;
-				usbData.baddr = 0;
-				usbData.count = 0;
+				readData.baddr = 0;
+				readData.count = 0;
 			} else {
 				uint8_t s = readData.service;
 				switch (s) {
 					case SET_LINE_CODING:
-						pma2usr(linecoding, getTableRxAddr(0), readData.count);
-						readData.count = 0;
-						post0tx();
-						break;
+					pma2usr(linecoding, getTableRxAddr(0), readData.count);
+					readData.service = 0;
+					readData.count = 0;
+					break;
 				}
+				post0tx();
 			}
 		}
 	} else {
-		clrCTR_tx(0);			// IN Process (TX)
-		if (usbData.count & 0x3ff) { 	// Проверяем есть ли пакет для отправки
+		clrCTR_tx(0);			// передача данных
+		if (writeData.count) { 	// Проверяем есть ли пакет для отправки
 			// Если да - отправляем
-			uint8_t tmp =
-					((usbData.count & 0x3ff) > BUF0SIZE) ?
-							BUF0SIZE : (usbData.count & 0x3ff);
-			usr2pma(usbData.baddr, getTableTxAddr(0), tmp);
-			usbData.baddr += tmp;
-			usbData.count -= tmp;
+			uint8_t tmp = (writeData.count > BUF0SIZE) ? BUF0SIZE : (writeData.count & 0x3ff);
+			usr2pma(writeData.baddr, getTableTxAddr(0), tmp);
+			writeData.baddr += tmp;
+			writeData.count -= tmp;
 			setTxCount(0, tmp);
-			saveRXst = NAK;
 			saveTXst = VALID;
-		} else {		// Если нет
-			if (((USB->DADDR & 0x7f) == 0) && (usbData.daddr)) {
-				// Проверяем установлен ли адрес устройства
-				// Если нет устанавливаем
-				USB->DADDR = 0x80 | usbData.daddr;
-				saveRXst = VALID;
-			} else {
-				// и отправляем нулевой пакет
-				setTxCount(0, 0);
-				if (!(USB->EPR[0] & 0x40))
-					toggleTx(0);
-				saveTXst = VALID;
-				saveRXst = VALID;
-			}
+		} else {
+			setTxCount(0, 0);
+			saveTXst = NAK;
+			saveRXst = VALID;
 		}
-
 	}
 }
+
 void setup_process() {
 	uint8_t sw = reqBuf.req.bReq;
 	switch (sw) {
@@ -181,10 +175,14 @@ void setup_process() {
 		break;
 	case 5:			// SET_ADDRESS
 		bmap |= 8;
-		usbData.daddr = reqBuf.req.wValue;
-		usbData.count &= 0xf000;
+//		usbData.daddr = reqBuf.req.wValue;
+//		usbData.count &= 0xf000;
+		DeviceAddress = reqBuf.req.wValue;
 		setTxCount(0, 0);
+		setStatTx(0, VALID);
+		USB->DADDR = 0x80 | reqBuf.req.wValue;
 		saveTXst = VALID;
+		saveRXst = VALID;
 		break;
 	case 6:			// GET_DESCRIPTOR
 		bmap |= 0x10;
@@ -206,8 +204,8 @@ void setup_process() {
 		break;
 	case GET_LINE_CODING:
 		usr2pma(linecoding, getTableTxAddr(0), reqBuf.req.wLen);
-		usbData.baddr = 0;
-		usbData.count = 0;
+		writeData.baddr = 0;
+		writeData.count = 0;
 		setTxCount(0, reqBuf.req.wLen);
 		saveTXst = VALID;
 		break;
@@ -218,7 +216,7 @@ void setup_process() {
 		break;
 	default:
 		if (reqBuf.req.wLen == 0) {
-			usbData.count = 0;
+			writeData.count = 0;
 			setTxCount(0, 0);
 			saveTXst = VALID;
 		} //else getdsc(sw);
@@ -229,15 +227,15 @@ void getDescriptor(uint8_t *desc) {
 	uint16_t len = reqBuf.req.wLen;
 	uint16_t gsize = (len > BUF0SIZE) ? BUF0SIZE : len;
 	usr2pma(desc, getTableTxAddr(0), gsize);
-	usbData.baddr = &desc[gsize];
-	usbData.count = len - gsize;
+	writeData.baddr = &desc[gsize];
+	writeData.count = len - gsize;
 	setTxCount(0, gsize);
 	saveTXst = VALID;
 }
 void getdsc(uint8_t q) {
 	in_stat = q;
 
-	usbData.count = 0;
+	writeData.count = 0;
 	setTxCount(0, 0);
 	saveTXst = VALID;
 }
@@ -263,18 +261,18 @@ void getConfig() {
 	uint8_t cfg = 1;
 	usr2pma(&cfg, getTableTxAddr(0), 1);
 	setTxCount(0, 1);
-	usbData.count = 0;
+	writeData.count = 0;
 	saveTXst = VALID;
 }
 void getStatus() {
 	uint16_t cfg = 1;
 	usr2pma((uint8_t*) &cfg, getTableTxAddr(0), 2);
 	setTxCount(0, 2);
-	usbData.count = 0;
+	writeData.count = 0;
 	saveTXst = VALID;
 }
 void setConfig() {
-	usbData.count = 0;
+	writeData.count = 0;
 	setTxCount(0, 0);
 	saveTXst = VALID;
 }

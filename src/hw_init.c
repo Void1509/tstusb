@@ -8,11 +8,11 @@
 #include "stm32f10x.h"
 #include "usb.h"
 
+uint8_t usbconn;
+
 void hw_init() {
 	// USB CLK Init инициализация тактирования USB
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
-	RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
+	RCC->APB2ENR |= RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPBEN | RCC_APB2ENR_IOPCEN;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 	RCC_USBCLKConfig(RCC_USBCLKSource_PLLCLK_1Div5);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
@@ -26,9 +26,17 @@ void hw_init() {
 	GPIO_Init(GPIOA, &io);
 
 	// port B init (leds) open Drain
-	GPIOB->CRH |= 0x11;
-	GPIOB->ODR |= 0x300;
+	GPIOB->ODR |= 1;
+	GPIOB->CRL |= 1;
+	GPIOC->ODR |= (1 << 13);
+	GPIOC->CRH |= (1 << 20);
+	AFIO->EXTICR[0] |= (1 << 4);
 
+	EXTI->IMR |= EXTI_IMR_MR1;
+	EXTI->RTSR |= EXTI_RTSR_TR1;
+	EXTI->FTSR |= EXTI_FTSR_TR1;
+	NVIC_EnableIRQ(EXTI1_IRQn);
+	usbconn = 0;
 /*
 	io.GPIO_Mode = GPIO_Mode_Out_PP;
 	io.GPIO_Pin = GPIO_Pin_5;
@@ -51,6 +59,18 @@ void hw_init() {
 	EXTI->FTSR |= EXTI_FTSR_TR11;
 */
 }
+void EXTI1_IRQHandler() {
+	EXTI->PR |= EXTI_PR_PR1;
+	if (GPIOB->IDR & 2) {
+		GPIOC->BSRR = (1 << 29);
+		usbconn = 1;
+	} else {
+		GPIOC->BSRR = (1 << 13);
+		usbconn = 0;
+	}
+}
+
+
 void intToUni(uint32_t ui, uint8_t *buf, uint8_t len) {
 
 	uint8_t i1,i2;

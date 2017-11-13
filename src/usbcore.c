@@ -69,7 +69,11 @@ uint8_t getCommBuff(uint8_t *dst) {
 uint8_t getCommCount() {
 	return readcount;
 }
-
+void sendCommBuff(uint8_t* dat, uint8_t cnt) {
+	usr2pma(dat, getTableTxAddr(1), cnt);
+	setTxCount(1, cnt);
+	setStatTx(1, VALID);
+}
 void usb_ctr_int() {
 	stat = USB->ISTR;
 	switch (stat & 0xf) {

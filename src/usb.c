@@ -29,6 +29,12 @@ void usb_init() {
 	USB->ISTR = 0;
 //	GPIOC->CRL |= GPIO_CRL_MODE7_1;
 }
+
+void usb_deinit(){
+	NVIC_DisableIRQ(USB_LP_CAN1_RX0_IRQn);
+	USB->CNTR = 3;
+}
+
 void setkind() {
 	uint16_t tmp = USB->EPR[0] & 0x868f;
 	tmp |= 0x100;

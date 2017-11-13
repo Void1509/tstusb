@@ -1,5 +1,6 @@
 //
 // This file is part of the GNU ARM Eclipse distribution.
+// This file is part of the GNU ARM Eclipse distribution.
 // Copyright (c) 2014 Liviu Ionescu.
 //
 
@@ -33,6 +34,8 @@
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #pragma GCC diagnostic ignored "-Wreturn-type"
 
+
+extern uint8_t usbconn;
 //void initialise_monitor_handles(void);
 void hw_init();
 
@@ -42,6 +45,7 @@ int main(int argc, char* argv[]) {
 	// at high speed.
 	uint8_t comm[16];
 	uint8_t tmp;
+	uint8_t send = 0;
 
 
 	myDelay_init();
@@ -55,16 +59,49 @@ int main(int argc, char* argv[]) {
 //	printf("Hello Semi\n");
 //	trace_puts("Hello ARM World!");
 	// Infinite loop
+	myDelay(2000);
 	usb_init();
+	LED_ON(0);
 	while (1) {
+/*
+		if (usbconn) {
+			usb_init();
+			LED_ON(0);
+		} else {
+			usb_deinit();
+			LED_OFF(0);
+		}
+*/
+/*
 		if (getCommCount()) {
 			tmp = getCommBuff(comm);
 			comm[tmp] = 0;
-			if (!strcmp((const char*)comm,"q1\n")) LED_ON(9);
-			if (!strcmp((const char*)comm,"q0\n")) LED_OFF(9);
-			if (!strcmp((const char*)comm,"w1\n")) LED_ON(8);
-			if (!strcmp((const char*)comm,"w0\n")) LED_OFF(8);
+			if (!strcmp((const char*)comm,"q1\n")) send = 1;
+			if (!strcmp((const char*)comm,"q0\n")) send = 2;
+			if (!strcmp((const char*)comm,"w1\n")) send = 3;
+			if (!strcmp((const char*)comm,"w0\n")) send = 4;
 		}
+		switch (send) {
+			case 1:
+				sendCommBuff((uint8_t*)"Hello world!!!\n",15);
+				send = 0;
+				break;
+			case 2:
+				sendCommBuff((uint8_t*)"Hello off     \n",15);
+				send = 0;
+				break;
+			case 3:
+				sendCommBuff((uint8_t*)"Valera on     \n",15);
+				send = 0;
+				break;
+			case 4:
+				sendCommBuff((uint8_t*)"Valera off    \n",15);
+				send = 0;
+				break;
+			default:
+				break;
+		}
+*/
 		myDelay(100);
 
 //		if (GPIOC->IDR & (1 << 11)) LED_ON; else LED_OFF;

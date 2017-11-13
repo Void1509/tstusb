@@ -115,6 +115,7 @@ void toggleRx(uint8_t ep);
 void toggleTx(uint8_t ep);
 
 void usb_init();
+void usb_deinit();
 void setStatTx(uint8_t ep, uint16_t stat);
 void setStatRx(uint8_t ep, uint16_t stat);
 uint16_t getTableTxAddr(uint8_t ep);
@@ -124,6 +125,7 @@ void usr2pma(uint8_t *src, uint16_t addr, uint16_t cnt);
 void pma2usr(uint8_t *dst, uint16_t addr, uint16_t cnt);
 uint8_t getCommBuff(uint8_t *dst);
 uint8_t getCommCount();
+void sendCommBuff(uint8_t* dat, uint8_t cnt);
 void setkind();
 void clrkind();
 #endif /* USB_H_ */

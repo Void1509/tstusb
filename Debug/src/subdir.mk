@@ -5,6 +5,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../src/descriptor.c \
+../src/disp.c \
 ../src/hw_init.c \
 ../src/main.c \
 ../src/usb.c \
@@ -12,6 +13,7 @@ C_SRCS += \
 
 OBJS += \
 ./src/descriptor.o \
+./src/disp.o \
 ./src/hw_init.o \
 ./src/main.o \
 ./src/usb.o \
@@ -19,6 +21,7 @@ OBJS += \
 
 C_DEPS += \
 ./src/descriptor.d \
+./src/disp.d \
 ./src/hw_init.d \
 ./src/main.d \
 ./src/usb.d \

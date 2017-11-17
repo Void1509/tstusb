@@ -13,6 +13,7 @@ linecoding          0x8               ./src/usbcore.o
 intStat             0x2               ./src/usb.o
 reqBuf              0x8               ./src/usbcore.o
 denois              0x1               ./src_lib/delay.o
+key                 0x1               ./src/hw_init.o
 usbconn             0x1               ./src/hw_init.o
 
 Discarded input sections
@@ -20,8 +21,6 @@ Discarded input sections
  .text          0x0000000000000000        0x0 ./system/src/stm32f1-stdperiph/misc.o
  .data          0x0000000000000000        0x0 ./system/src/stm32f1-stdperiph/misc.o
  .bss           0x0000000000000000        0x0 ./system/src/stm32f1-stdperiph/misc.o
- .text.NVIC_PriorityGroupConfig
-                0x0000000000000000       0x14 ./system/src/stm32f1-stdperiph/misc.o
  .text.NVIC_Init
                 0x0000000000000000       0x6c ./system/src/stm32f1-stdperiph/misc.o
  .text.NVIC_SetVectorTable
@@ -30,18 +29,6 @@ Discarded input sections
                 0x0000000000000000       0x18 ./system/src/stm32f1-stdperiph/misc.o
  .text.SysTick_CLKSourceConfig
                 0x0000000000000000       0x18 ./system/src/stm32f1-stdperiph/misc.o
- .debug_info    0x0000000000000000      0x53d ./system/src/stm32f1-stdperiph/misc.o
- .debug_abbrev  0x0000000000000000      0x158 ./system/src/stm32f1-stdperiph/misc.o
- .debug_loc     0x0000000000000000      0x161 ./system/src/stm32f1-stdperiph/misc.o
- .debug_aranges
-                0x0000000000000000       0x40 ./system/src/stm32f1-stdperiph/misc.o
- .debug_ranges  0x0000000000000000       0x30 ./system/src/stm32f1-stdperiph/misc.o
- .debug_line    0x0000000000000000      0x181 ./system/src/stm32f1-stdperiph/misc.o
- .debug_str     0x0000000000000000      0x41c ./system/src/stm32f1-stdperiph/misc.o
- .comment       0x0000000000000000       0x6f ./system/src/stm32f1-stdperiph/misc.o
- .debug_frame   0x0000000000000000       0x68 ./system/src/stm32f1-stdperiph/misc.o
- .ARM.attributes
-                0x0000000000000000       0x33 ./system/src/stm32f1-stdperiph/misc.o
  .text          0x0000000000000000        0x0 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
  .data          0x0000000000000000        0x0 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
  .bss           0x0000000000000000        0x0 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
@@ -259,9 +246,16 @@ Discarded input sections
  .text          0x0000000000000000        0x0 ./src/descriptor.o
  .data          0x0000000000000000        0x0 ./src/descriptor.o
  .bss           0x0000000000000000        0x0 ./src/descriptor.o
+ .text          0x0000000000000000        0x0 ./src/disp.o
+ .data          0x0000000000000000        0x0 ./src/disp.o
+ .bss           0x0000000000000000        0x0 ./src/disp.o
+ .text.lcd_char
+                0x0000000000000000       0x30 ./src/disp.o
+ .text.lcd_str  0x0000000000000000       0x12 ./src/disp.o
  .text          0x0000000000000000        0x0 ./src/hw_init.o
  .data          0x0000000000000000        0x0 ./src/hw_init.o
  .bss           0x0000000000000000        0x0 ./src/hw_init.o
+ .text.getkey   0x0000000000000000       0x10 ./src/hw_init.o
  .text.intToUni
                 0x0000000000000000       0x2e ./src/hw_init.o
  .text          0x0000000000000000        0x0 ./src/main.o
@@ -344,6 +338,7 @@ LOAD ./system/src/cmsis/system_stm32f10x.o
 LOAD ./system/src/cmsis/vectors_stm32f10x.o
 LOAD ./src_lib/delay.o
 LOAD ./src/descriptor.o
+LOAD ./src/disp.o
 LOAD ./src/hw_init.o
 LOAD ./src/main.o
 LOAD ./src/usb.o
@@ -366,7 +361,7 @@ END GROUP
                 0x0000000020004c00                __Main_Stack_Limit = (__stack - __Main_Stack_Size)
                 [!provide]                        PROVIDE (_Main_Stack_Limit, __Main_Stack_Limit)
                 0x0000000000000100                _Minimum_Stack_Size = 0x100
-                0x0000000020000088                PROVIDE (_Heap_Begin, _end_noinit)
+                0x00000000200000dc                PROVIDE (_Heap_Begin, _end_noinit)
                 0x0000000020004c00                PROVIDE (_Heap_Limit, (__stack - __Main_Stack_Size))
 
 .isr_vector     0x0000000008000000      0x232
@@ -409,7 +404,6 @@ END GROUP
                 0x0000000008000230                TIM8_TRG_COM_TIM14_IRQHandler
                 0x0000000008000230                TIM1_UP_TIM10_IRQHandler
                 0x0000000008000230                TIM8_UP_TIM13_IRQHandler
-                0x0000000008000230                EXTI0_IRQHandler
                 0x0000000008000230                I2C2_EV_IRQHandler
                 0x0000000008000230                CAN1_RX0_IRQHandler
                 0x0000000008000230                TIM1_UP_TIM16_IRQHandler
@@ -429,7 +423,6 @@ END GROUP
                 0x0000000008000230                CAN1_RX1_IRQHandler
                 0x0000000008000230                UART5_IRQHandler
                 0x0000000008000230                ADC3_IRQHandler
-                0x0000000008000230                TIM4_IRQHandler
                 0x0000000008000230                DMA2_Channel1_IRQHandler
                 0x0000000008000230                I2C1_EV_IRQHandler
                 0x0000000008000230                DMA1_Channel6_IRQHandler
@@ -483,16 +476,16 @@ END GROUP
 
 .inits          0x0000000008000234       0x28
                 0x0000000008000234                __data_regions_array_start = .
-                0x0000000008000234        0x4 LONG 0x8000f44 LOADADDR (.data)
+                0x0000000008000234        0x4 LONG 0x80011f0 LOADADDR (.data)
                 0x0000000008000238        0x4 LONG 0x20000000 ADDR (.data)
                 0x000000000800023c        0x4 LONG 0x20000034 (ADDR (.data) + SIZEOF (.data))
-                0x0000000008000240        0x4 LONG 0x8000f44 LOADADDR (.data_CCMRAM)
+                0x0000000008000240        0x4 LONG 0x80011f0 LOADADDR (.data_CCMRAM)
                 0x0000000008000244        0x4 LONG 0x0 ADDR (.data_CCMRAM)
                 0x0000000008000248        0x4 LONG 0x0 (ADDR (.data_CCMRAM) + SIZEOF (.data_CCMRAM))
                 0x000000000800024c                __data_regions_array_end = .
                 0x000000000800024c                __bss_regions_array_start = .
                 0x000000000800024c        0x4 LONG 0x20000034 ADDR (.bss)
-                0x0000000008000250        0x4 LONG 0x20000088 (ADDR (.bss) + SIZEOF (.bss))
+                0x0000000008000250        0x4 LONG 0x200000dc (ADDR (.bss) + SIZEOF (.bss))
                 0x0000000008000254        0x4 LONG 0x0 ADDR (.bss_CCMRAM)
                 0x0000000008000258        0x4 LONG 0x0 (ADDR (.bss_CCMRAM) + SIZEOF (.bss_CCMRAM))
                 0x000000000800025c                __bss_regions_array_end = .
@@ -518,213 +511,243 @@ END GROUP
 .flashtext
  *(.flashtext .flashtext.*)
 
-.text           0x000000000800025c      0xce7
+.text           0x000000000800025c      0xf92
  *(.text .text.*)
+ .text.NVIC_PriorityGroupConfig
+                0x000000000800025c       0x14 ./system/src/stm32f1-stdperiph/misc.o
+                0x000000000800025c                NVIC_PriorityGroupConfig
  .text.GPIO_Init
-                0x000000000800025c       0xa4 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
-                0x000000000800025c                GPIO_Init
+                0x0000000008000270       0xa4 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
+                0x0000000008000270                GPIO_Init
  .text.RCC_USBCLKConfig
-                0x0000000008000300        0xc ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
-                0x0000000008000300                RCC_USBCLKConfig
+                0x0000000008000314        0xc ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
+                0x0000000008000314                RCC_USBCLKConfig
  .text.RCC_APB2PeriphClockCmd
-                0x000000000800030c       0x18 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
-                0x000000000800030c                RCC_APB2PeriphClockCmd
+                0x0000000008000320       0x18 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
+                0x0000000008000320                RCC_APB2PeriphClockCmd
  .text.RCC_APB1PeriphClockCmd
-                0x0000000008000324       0x18 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
-                0x0000000008000324                RCC_APB1PeriphClockCmd
- .text._exit    0x000000000800033c        0x6 ./system/src/newlib/_exit.o
-                0x000000000800033c                _exit
- *fill*         0x0000000008000342        0x2 
+                0x0000000008000338       0x18 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
+                0x0000000008000338                RCC_APB1PeriphClockCmd
+ .text._exit    0x0000000008000350        0x6 ./system/src/newlib/_exit.o
+                0x0000000008000350                _exit
+ *fill*         0x0000000008000356        0x2 
  .text.__initialize_args
-                0x0000000008000344       0x10 ./system/src/newlib/_syscalls.o
-                0x0000000008000344                __initialize_args
+                0x0000000008000358       0x10 ./system/src/newlib/_syscalls.o
+                0x0000000008000358                __initialize_args
  .text.__initialize_hardware_early
-                0x0000000008000354       0x18 ./system/src/cortexm/_initialize_hardware.o
-                0x0000000008000354                __initialize_hardware_early
+                0x0000000008000368       0x18 ./system/src/cortexm/_initialize_hardware.o
+                0x0000000008000368                __initialize_hardware_early
  .text.__initialize_hardware
-                0x000000000800036c        0x4 ./system/src/cortexm/_initialize_hardware.o
-                0x000000000800036c                __initialize_hardware
+                0x0000000008000380        0x4 ./system/src/cortexm/_initialize_hardware.o
+                0x0000000008000380                __initialize_hardware
  .text.__reset_hardware
-                0x0000000008000370       0x24 ./system/src/cortexm/_reset_hardware.o
-                0x0000000008000370                __reset_hardware
+                0x0000000008000384       0x24 ./system/src/cortexm/_reset_hardware.o
+                0x0000000008000384                __reset_hardware
  .text.SystemInit
-                0x0000000008000394       0xf4 ./system/src/cmsis/system_stm32f10x.o
-                0x0000000008000394                SystemInit
+                0x00000000080003a8       0xf4 ./system/src/cmsis/system_stm32f10x.o
+                0x00000000080003a8                SystemInit
  .text.SystemCoreClockUpdate
-                0x0000000008000488       0x5c ./system/src/cmsis/system_stm32f10x.o
-                0x0000000008000488                SystemCoreClockUpdate
+                0x000000000800049c       0x5c ./system/src/cmsis/system_stm32f10x.o
+                0x000000000800049c                SystemCoreClockUpdate
  .text.myDelay_init
-                0x00000000080004e4       0x48 ./src_lib/delay.o
-                0x00000000080004e4                myDelay_init
- .text.myDelay  0x000000000800052c       0x10 ./src_lib/delay.o
-                0x000000000800052c                myDelay
+                0x00000000080004f8       0x50 ./src_lib/delay.o
+                0x00000000080004f8                myDelay_init
+ .text.myDelay  0x0000000008000548       0x10 ./src_lib/delay.o
+                0x0000000008000548                myDelay
  .text.defaultUpTime
-                0x000000000800053c        0x2 ./src_lib/delay.o
-                0x000000000800053c                defaultUpTime
-                0x000000000800053c                timeUp
- *fill*         0x000000000800053e        0x2 
+                0x0000000008000558        0x2 ./src_lib/delay.o
+                0x0000000008000558                defaultUpTime
+                0x0000000008000558                timeUp
+ *fill*         0x000000000800055a        0x2 
  .text.SysTick_Handler
-                0x0000000008000540       0x40 ./src_lib/delay.o
-                0x0000000008000540                SysTick_Handler
- .text.hw_init  0x0000000008000580       0xbc ./src/hw_init.o
-                0x0000000008000580                hw_init
+                0x000000000800055c       0x40 ./src_lib/delay.o
+                0x000000000800055c                SysTick_Handler
+ .text.inc_inx.part.2
+                0x000000000800059c       0x18 ./src/disp.o
+ .text.set_oc_mode
+                0x00000000080005b4       0x5c ./src/disp.o
+                0x00000000080005b4                set_oc_mode
+ .text.pwm.part.1
+                0x0000000008000610       0x2c ./src/disp.o
+ .text.inc_inx  0x000000000800063c       0x1c ./src/disp.o
+                0x000000000800063c                inc_inx
+ .text.send_byte
+                0x0000000008000658       0x5c ./src/disp.o
+ .text.lcd_cmd  0x00000000080006b4       0x40 ./src/disp.o
+                0x00000000080006b4                lcd_cmd
+ .text.lcd_init
+                0x00000000080006f4       0x98 ./src/disp.o
+                0x00000000080006f4                lcd_init
+ .text.TIM4_IRQHandler
+                0x000000000800078c       0x58 ./src/disp.o
+                0x000000000800078c                TIM4_IRQHandler
+ .text.hw_init  0x00000000080007e4       0xc4 ./src/hw_init.o
+                0x00000000080007e4                hw_init
  .text.EXTI1_IRQHandler
-                0x000000000800063c       0x3c ./src/hw_init.o
-                0x000000000800063c                EXTI1_IRQHandler
+                0x00000000080008a8       0x28 ./src/hw_init.o
+                0x00000000080008a8                EXTI1_IRQHandler
+ .text.EXTI0_IRQHandler
+                0x00000000080008d0       0x28 ./src/hw_init.o
+                0x00000000080008d0                EXTI0_IRQHandler
  .text.startup.main
-                0x0000000008000678       0x2c ./src/main.o
-                0x0000000008000678                main
+                0x00000000080008f8       0x30 ./src/main.o
+                0x00000000080008f8                main
  .text.EXTI15_10_IRQHandler
-                0x00000000080006a4       0x34 ./src/main.o
-                0x00000000080006a4                EXTI15_10_IRQHandler
+                0x0000000008000928       0x34 ./src/main.o
+                0x0000000008000928                EXTI15_10_IRQHandler
  .text.usb_init
-                0x00000000080006d8       0x2c ./src/usb.o
-                0x00000000080006d8                usb_init
+                0x000000000800095c       0x3c ./src/usb.o
+                0x000000000800095c                usb_init
  .text.setTxCount
-                0x0000000008000704       0x10 ./src/usb.o
-                0x0000000008000704                setTxCount
+                0x0000000008000998       0x10 ./src/usb.o
+                0x0000000008000998                setTxCount
  .text.getTableTxAddr
-                0x0000000008000714       0x10 ./src/usb.o
-                0x0000000008000714                getTableTxAddr
+                0x00000000080009a8       0x10 ./src/usb.o
+                0x00000000080009a8                getTableTxAddr
  .text.getTableRxAddr
-                0x0000000008000724       0x10 ./src/usb.o
-                0x0000000008000724                getTableRxAddr
+                0x00000000080009b8       0x10 ./src/usb.o
+                0x00000000080009b8                getTableRxAddr
  .text.getTableRxCount
-                0x0000000008000734       0x14 ./src/usb.o
-                0x0000000008000734                getTableRxCount
+                0x00000000080009c8       0x14 ./src/usb.o
+                0x00000000080009c8                getTableRxCount
  .text.setEPType
-                0x0000000008000748       0x22 ./src/usb.o
-                0x0000000008000748                setEPType
+                0x00000000080009dc       0x22 ./src/usb.o
+                0x00000000080009dc                setEPType
  .text.toggleTx
-                0x000000000800076a       0x20 ./src/usb.o
-                0x000000000800076a                toggleTx
+                0x00000000080009fe       0x20 ./src/usb.o
+                0x00000000080009fe                toggleTx
  .text.setStatTx
-                0x000000000800078a       0x28 ./src/usb.o
-                0x000000000800078a                setStatTx
+                0x0000000008000a1e       0x28 ./src/usb.o
+                0x0000000008000a1e                setStatTx
  .text.setStatRx
-                0x00000000080007b2       0x28 ./src/usb.o
-                0x00000000080007b2                setStatRx
+                0x0000000008000a46       0x28 ./src/usb.o
+                0x0000000008000a46                setStatRx
  .text.clrCTR_rx
-                0x00000000080007da       0x18 ./src/usb.o
-                0x00000000080007da                clrCTR_rx
+                0x0000000008000a6e       0x18 ./src/usb.o
+                0x0000000008000a6e                clrCTR_rx
  .text.clrCTR_tx
-                0x00000000080007f2       0x1c ./src/usb.o
-                0x00000000080007f2                clrCTR_tx
- *fill*         0x000000000800080e        0x2 
- .text.usr2pma  0x0000000008000810       0x4c ./src/usb.o
-                0x0000000008000810                usr2pma
- .text.pma2usr  0x000000000800085c       0x34 ./src/usb.o
-                0x000000000800085c                pma2usr
+                0x0000000008000a86       0x1c ./src/usb.o
+                0x0000000008000a86                clrCTR_tx
+ *fill*         0x0000000008000aa2        0x2 
+ .text.usr2pma  0x0000000008000aa4       0x4c ./src/usb.o
+                0x0000000008000aa4                usr2pma
+ .text.pma2usr  0x0000000008000af0       0x34 ./src/usb.o
+                0x0000000008000af0                pma2usr
  .text.tableInit
-                0x0000000008000890       0x34 ./src/usb.o
-                0x0000000008000890                tableInit
- .text.ep_init  0x00000000080008c4       0x50 ./src/usb.o
-                0x00000000080008c4                ep_init
+                0x0000000008000b24       0x34 ./src/usb.o
+                0x0000000008000b24                tableInit
+ .text.ep_init  0x0000000008000b58       0x50 ./src/usb.o
+                0x0000000008000b58                ep_init
  .text.USB_LP_CAN1_RX0_IRQHandler
-                0x0000000008000914       0x70 ./src/usb.o
-                0x0000000008000914                USB_LP_CAN1_RX0_IRQHandler
+                0x0000000008000ba8       0x70 ./src/usb.o
+                0x0000000008000ba8                USB_LP_CAN1_RX0_IRQHandler
  .text.USB_HP_CAN1_TX_IRQHandler
-                0x0000000008000984       0x24 ./src/usb.o
-                0x0000000008000984                USB_HP_CAN1_TX_IRQHandler
+                0x0000000008000c18       0x24 ./src/usb.o
+                0x0000000008000c18                USB_HP_CAN1_TX_IRQHandler
  .text.usb_reset_int
-                0x00000000080009a8       0x34 ./src/usbcore.o
-                0x00000000080009a8                usb_reset_int
+                0x0000000008000c3c       0x34 ./src/usbcore.o
+                0x0000000008000c3c                usb_reset_int
  .text.usb_esof_int
-                0x00000000080009dc        0x2 ./src/usbcore.o
-                0x00000000080009dc                usb_esof_int
+                0x0000000008000c70        0x2 ./src/usbcore.o
+                0x0000000008000c70                usb_esof_int
  .text.usb_sof_int
-                0x00000000080009de        0x2 ./src/usbcore.o
-                0x00000000080009de                usb_sof_int
+                0x0000000008000c72        0x2 ./src/usbcore.o
+                0x0000000008000c72                usb_sof_int
  .text.usb_err_int
-                0x00000000080009e0        0x2 ./src/usbcore.o
-                0x00000000080009e0                usb_err_int
+                0x0000000008000c74        0x2 ./src/usbcore.o
+                0x0000000008000c74                usb_err_int
  .text.usb_pma_int
-                0x00000000080009e2        0x2 ./src/usbcore.o
-                0x00000000080009e2                usb_pma_int
- .text.post0tx  0x00000000080009e4       0x30 ./src/usbcore.o
-                0x00000000080009e4                post0tx
+                0x0000000008000c76        0x2 ./src/usbcore.o
+                0x0000000008000c76                usb_pma_int
+ .text.post0tx  0x0000000008000c78       0x30 ./src/usbcore.o
+                0x0000000008000c78                post0tx
  .text.getDescriptor
-                0x0000000008000a14       0x48 ./src/usbcore.o
-                0x0000000008000a14                getDescriptor
- .text.getdsc   0x0000000008000a5c       0x20 ./src/usbcore.o
-                0x0000000008000a5c                getdsc
- .text.getDesc  0x0000000008000a7c       0x3c ./src/usbcore.o
-                0x0000000008000a7c                getDesc
+                0x0000000008000ca8       0x48 ./src/usbcore.o
+                0x0000000008000ca8                getDescriptor
+ .text.getdsc   0x0000000008000cf0       0x20 ./src/usbcore.o
+                0x0000000008000cf0                getdsc
+ .text.getDesc  0x0000000008000d10       0x3c ./src/usbcore.o
+                0x0000000008000d10                getDesc
  .text.getConfig
-                0x0000000008000ab8       0x3c ./src/usbcore.o
-                0x0000000008000ab8                getConfig
+                0x0000000008000d4c       0x3c ./src/usbcore.o
+                0x0000000008000d4c                getConfig
  .text.getStatus
-                0x0000000008000af4       0x3c ./src/usbcore.o
-                0x0000000008000af4                getStatus
+                0x0000000008000d88       0x3c ./src/usbcore.o
+                0x0000000008000d88                getStatus
  .text.setConfig
-                0x0000000008000b30       0x20 ./src/usbcore.o
-                0x0000000008000b30                setConfig
+                0x0000000008000dc4       0x20 ./src/usbcore.o
+                0x0000000008000dc4                setConfig
  .text.setup_process
-                0x0000000008000b50      0x190 ./src/usbcore.o
-                0x0000000008000b50                setup_process
+                0x0000000008000de4      0x190 ./src/usbcore.o
+                0x0000000008000de4                setup_process
  .text.EP0Interrupt
-                0x0000000008000ce0      0x108 ./src/usbcore.o
-                0x0000000008000ce0                EP0Interrupt
+                0x0000000008000f74      0x108 ./src/usbcore.o
+                0x0000000008000f74                EP0Interrupt
  .text.usb_ctr_int
-                0x0000000008000de8       0x9c ./src/usbcore.o
-                0x0000000008000de8                usb_ctr_int
+                0x000000000800107c       0x9c ./src/usbcore.o
+                0x000000000800107c                usb_ctr_int
  *(.rodata .rodata.* .constdata .constdata.*)
  .rodata.StringProduct
-                0x0000000008000e84       0x34 ./src/descriptor.o
-                0x0000000008000e84                StringProduct
+                0x0000000008001118       0x34 ./src/descriptor.o
+                0x0000000008001118                StringProduct
  .rodata.StringSerial
-                0x0000000008000eb8       0x1a ./src/descriptor.o
-                0x0000000008000eb8                StringSerial
+                0x000000000800114c       0x1a ./src/descriptor.o
+                0x000000000800114c                StringSerial
  .rodata.StringLangID
-                0x0000000008000ed2        0x4 ./src/descriptor.o
-                0x0000000008000ed2                StringLangID
+                0x0000000008001166        0x4 ./src/descriptor.o
+                0x0000000008001166                StringLangID
  .rodata.ConfigDescriptor
-                0x0000000008000ed6       0x43 ./src/descriptor.o
-                0x0000000008000ed6                ConfigDescriptor
+                0x000000000800116a       0x43 ./src/descriptor.o
+                0x000000000800116a                ConfigDescriptor
  .rodata.StringVendor
-                0x0000000008000f19       0x18 ./src/descriptor.o
-                0x0000000008000f19                StringVendor
+                0x00000000080011ad       0x18 ./src/descriptor.o
+                0x00000000080011ad                StringVendor
  .rodata.DeviceDescriptor
-                0x0000000008000f31       0x12 ./src/descriptor.o
-                0x0000000008000f31                DeviceDescriptor
+                0x00000000080011c5       0x12 ./src/descriptor.o
+                0x00000000080011c5                DeviceDescriptor
+ *fill*         0x00000000080011d7        0x1 
+ .rodata.initbytes
+                0x00000000080011d8       0x10 ./src/disp.o
+ .rodata.pwidth
+                0x00000000080011e8        0x6 ./src/disp.o
  *(vtable)
  *(.eh_frame*)
  *(.glue_7)
- .glue_7        0x0000000008000f43        0x0 linker stubs
+ .glue_7        0x00000000080011ee        0x0 linker stubs
  *(.glue_7t)
- .glue_7t       0x0000000008000f43        0x0 linker stubs
+ .glue_7t       0x00000000080011ee        0x0 linker stubs
 
-.vfp11_veneer   0x0000000008000f44        0x0
- .vfp11_veneer  0x0000000008000f44        0x0 linker stubs
+.vfp11_veneer   0x00000000080011f0        0x0
+ .vfp11_veneer  0x00000000080011f0        0x0 linker stubs
 
-.v4_bx          0x0000000008000f44        0x0
- .v4_bx         0x0000000008000f44        0x0 linker stubs
+.v4_bx          0x00000000080011f0        0x0
+ .v4_bx         0x00000000080011f0        0x0 linker stubs
 
-.iplt           0x0000000008000f44        0x0
- .iplt          0x0000000008000f44        0x0 ./system/src/stm32f1-stdperiph/misc.o
+.iplt           0x00000000080011f0        0x0
+ .iplt          0x00000000080011f0        0x0 ./system/src/stm32f1-stdperiph/misc.o
 
-.rel.dyn        0x0000000008000f44        0x0
- .rel.iplt      0x0000000008000f44        0x0 ./system/src/stm32f1-stdperiph/misc.o
+.rel.dyn        0x00000000080011f0        0x0
+ .rel.iplt      0x00000000080011f0        0x0 ./system/src/stm32f1-stdperiph/misc.o
 
 .ARM.extab
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x0000000008000f44                . = ALIGN (0x4)
-                0x0000000008000f44                __exidx_start = .
+                0x00000000080011f0                . = ALIGN (0x4)
+                0x00000000080011f0                __exidx_start = .
 
 .ARM.exidx
  *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-                0x0000000008000f44                __exidx_end = .
-                0x0000000008000f44                . = ALIGN (0x4)
-                0x0000000008000f44                _etext = .
-                0x0000000008000f44                __etext = .
+                0x00000000080011f0                __exidx_end = .
+                0x00000000080011f0                . = ALIGN (0x4)
+                0x00000000080011f0                _etext = .
+                0x00000000080011f0                __etext = .
 
-.data_CCMRAM    0x0000000000000000        0x0 load address 0x0000000008000f44
+.data_CCMRAM    0x0000000000000000        0x0 load address 0x00000000080011f0
  FILL mask 0xff
  *(.data.CCMRAM .data.CCMRAM.*)
                 0x0000000000000000                . = ALIGN (0x4)
-                0x0000000008000f44                _sidata = LOADADDR (.data)
+                0x00000000080011f0                _sidata = LOADADDR (.data)
 
-.data           0x0000000020000000       0x34 load address 0x0000000008000f44
+.data           0x0000000020000000       0x34 load address 0x00000000080011f0
  FILL mask 0xff
                 0x0000000020000000                _sdata = .
                 0x0000000020000000                __data_start__ = .
@@ -749,13 +772,13 @@ END GROUP
                 0x0000000020000034                _edata = .
                 0x0000000020000034                __data_end__ = .
 
-.igot.plt       0x0000000020000034        0x0 load address 0x0000000008000f78
+.igot.plt       0x0000000020000034        0x0 load address 0x0000000008001224
  .igot.plt      0x0000000020000034        0x0 ./system/src/stm32f1-stdperiph/misc.o
 
 .bss_CCMRAM     0x0000000000000000        0x0
  *(.bss.CCMRAM .bss.CCMRAM.*)
 
-.bss            0x0000000020000034       0x54
+.bss            0x0000000020000034       0xa8
                 0x0000000020000034                __bss_start__ = .
                 0x0000000020000034                _sbss = .
  *(.bss_begin .bss_begin.*)
@@ -767,50 +790,55 @@ END GROUP
                 0x0000000020000038        0x4 ./src_lib/delay.o
  .bss.myDelayTicks
                 0x000000002000003c        0x4 ./src_lib/delay.o
- .bss.readData  0x0000000020000040        0xc ./src/usbcore.o
+ .bss.hinx      0x0000000020000040        0x1 ./src/disp.o
+ *fill*         0x0000000020000041        0x1 
+ .bss.charbuf   0x0000000020000042       0x50 ./src/disp.o
+ .bss.tinx      0x0000000020000092        0x1 ./src/disp.o
+ .bss.fl        0x0000000020000093        0x1 ./src/disp.o
+ .bss.readData  0x0000000020000094        0xc ./src/usbcore.o
  .bss.writeData
-                0x000000002000004c        0xc ./src/usbcore.o
- .bss.readBuf   0x0000000020000058       0x10 ./src/usbcore.o
+                0x00000000200000a0        0xc ./src/usbcore.o
+ .bss.readBuf   0x00000000200000ac       0x10 ./src/usbcore.o
  .bss.DeviceAddress
-                0x0000000020000068        0x2 ./src/usbcore.o
- .bss.bmap      0x000000002000006a        0x2 ./src/usbcore.o
- .bss.saveRXst  0x000000002000006c        0x2 ./src/usbcore.o
- .bss.saveTXst  0x000000002000006e        0x2 ./src/usbcore.o
+                0x00000000200000bc        0x2 ./src/usbcore.o
+ .bss.bmap      0x00000000200000be        0x2 ./src/usbcore.o
+ .bss.saveRXst  0x00000000200000c0        0x2 ./src/usbcore.o
+ .bss.saveTXst  0x00000000200000c2        0x2 ./src/usbcore.o
  .bss.readcount
-                0x0000000020000070        0x1 ./src/usbcore.o
+                0x00000000200000c4        0x1 ./src/usbcore.o
  *(COMMON)
- COMMON         0x0000000020000071        0x1 ./src_lib/delay.o
-                0x0000000020000071                denois
- COMMON         0x0000000020000072        0x1 ./src/hw_init.o
-                0x0000000020000072                usbconn
- *fill*         0x0000000020000073        0x1 
- COMMON         0x0000000020000074        0x2 ./src/usb.o
-                0x0000000020000074                intStat
- COMMON         0x0000000020000076       0x10 ./src/usbcore.o
-                0x0000000020000076                linecoding
-                0x000000002000007e                reqBuf
+ COMMON         0x00000000200000c5        0x1 ./src_lib/delay.o
+                0x00000000200000c5                denois
+ COMMON         0x00000000200000c6        0x2 ./src/hw_init.o
+                0x00000000200000c6                key
+                0x00000000200000c7                usbconn
+ COMMON         0x00000000200000c8        0x2 ./src/usb.o
+                0x00000000200000c8                intStat
+ COMMON         0x00000000200000ca       0x10 ./src/usbcore.o
+                0x00000000200000ca                linecoding
+                0x00000000200000d2                reqBuf
  *(.bss_end .bss_end.*)
-                0x0000000020000088                . = ALIGN (0x4)
- *fill*         0x0000000020000086        0x2 
-                0x0000000020000088                __bss_end__ = .
-                0x0000000020000088                _ebss = .
+                0x00000000200000dc                . = ALIGN (0x4)
+ *fill*         0x00000000200000da        0x2 
+                0x00000000200000dc                __bss_end__ = .
+                0x00000000200000dc                _ebss = .
 
 .noinit_CCMRAM
  *(.noinit.CCMRAM .noinit.CCMRAM.*)
 
-.noinit         0x0000000020000088        0x0
-                0x0000000020000088                _noinit = .
+.noinit         0x00000000200000dc        0x0
+                0x00000000200000dc                _noinit = .
  *(.noinit .noinit.*)
-                0x0000000020000088                . = ALIGN (0x4)
-                0x0000000020000088                _end_noinit = .
+                0x00000000200000dc                . = ALIGN (0x4)
+                0x00000000200000dc                _end_noinit = .
                 [!provide]                        PROVIDE (end, _end_noinit)
                 [!provide]                        PROVIDE (_end, _end_noinit)
                 [!provide]                        PROVIDE (__end, _end_noinit)
                 [!provide]                        PROVIDE (__end__, _end_noinit)
 
-._check_stack   0x0000000020000088      0x100
-                0x0000000020000188                . = (. + _Minimum_Stack_Size)
- *fill*         0x0000000020000088      0x100 
+._check_stack   0x00000000200000dc      0x100
+                0x00000000200001dc                . = (. + _Minimum_Stack_Size)
+ *fill*         0x00000000200000dc      0x100 
 
 .b1text
  *(.b1text)
@@ -857,8 +885,9 @@ END GROUP
 
 .comment        0x0000000000000000       0x6e
  *(.comment)
- .comment       0x0000000000000000       0x6e ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
+ .comment       0x0000000000000000       0x6e ./system/src/stm32f1-stdperiph/misc.o
                                          0x6f (size before relaxing)
+ .comment       0x000000000000006e       0x6f ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
  .comment       0x000000000000006e       0x6f ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
  .comment       0x000000000000006e       0x6f ./system/src/newlib/_exit.o
  .comment       0x000000000000006e       0x6f ./system/src/newlib/_startup.o
@@ -870,6 +899,7 @@ END GROUP
  .comment       0x000000000000006e       0x6f ./system/src/cmsis/vectors_stm32f10x.o
  .comment       0x000000000000006e       0x6f ./src_lib/delay.o
  .comment       0x000000000000006e       0x6f ./src/descriptor.o
+ .comment       0x000000000000006e       0x6f ./src/disp.o
  .comment       0x000000000000006e       0x6f ./src/hw_init.o
  .comment       0x000000000000006e       0x6f ./src/main.o
  .comment       0x000000000000006e       0x6f ./src/usb.o
@@ -878,37 +908,41 @@ END GROUP
 .ARM.attributes
                 0x0000000000000000       0x33
  .ARM.attributes
-                0x0000000000000000       0x33 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
+                0x0000000000000000       0x33 ./system/src/stm32f1-stdperiph/misc.o
  .ARM.attributes
-                0x0000000000000033       0x33 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
+                0x0000000000000033       0x33 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
  .ARM.attributes
-                0x0000000000000066       0x33 ./system/src/newlib/_exit.o
+                0x0000000000000066       0x33 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
  .ARM.attributes
-                0x0000000000000099       0x33 ./system/src/newlib/_startup.o
+                0x0000000000000099       0x33 ./system/src/newlib/_exit.o
  .ARM.attributes
-                0x00000000000000cc       0x33 ./system/src/newlib/_syscalls.o
+                0x00000000000000cc       0x33 ./system/src/newlib/_startup.o
  .ARM.attributes
-                0x00000000000000ff       0x33 ./system/src/cortexm/_initialize_hardware.o
+                0x00000000000000ff       0x33 ./system/src/newlib/_syscalls.o
  .ARM.attributes
-                0x0000000000000132       0x33 ./system/src/cortexm/_reset_hardware.o
+                0x0000000000000132       0x33 ./system/src/cortexm/_initialize_hardware.o
  .ARM.attributes
-                0x0000000000000165       0x33 ./system/src/cortexm/exception_handlers.o
+                0x0000000000000165       0x33 ./system/src/cortexm/_reset_hardware.o
  .ARM.attributes
-                0x0000000000000198       0x33 ./system/src/cmsis/system_stm32f10x.o
+                0x0000000000000198       0x33 ./system/src/cortexm/exception_handlers.o
  .ARM.attributes
-                0x00000000000001cb       0x33 ./system/src/cmsis/vectors_stm32f10x.o
+                0x00000000000001cb       0x33 ./system/src/cmsis/system_stm32f10x.o
  .ARM.attributes
-                0x00000000000001fe       0x33 ./src_lib/delay.o
+                0x00000000000001fe       0x33 ./system/src/cmsis/vectors_stm32f10x.o
  .ARM.attributes
-                0x0000000000000231       0x33 ./src/descriptor.o
+                0x0000000000000231       0x33 ./src_lib/delay.o
  .ARM.attributes
-                0x0000000000000264       0x33 ./src/hw_init.o
+                0x0000000000000264       0x33 ./src/descriptor.o
  .ARM.attributes
-                0x0000000000000297       0x33 ./src/main.o
+                0x0000000000000297       0x33 ./src/disp.o
  .ARM.attributes
-                0x00000000000002ca       0x33 ./src/usb.o
+                0x00000000000002ca       0x33 ./src/hw_init.o
  .ARM.attributes
-                0x00000000000002fd       0x33 ./src/usbcore.o
+                0x00000000000002fd       0x33 ./src/main.o
+ .ARM.attributes
+                0x0000000000000330       0x33 ./src/usb.o
+ .ARM.attributes
+                0x0000000000000363       0x33 ./src/usbcore.o
 
 .debug
  *(.debug)
@@ -922,167 +956,185 @@ END GROUP
 .debug_sfnames
  *(.debug_sfnames)
 
-.debug_aranges  0x0000000000000000      0x580
+.debug_aranges  0x0000000000000000      0x638
  *(.debug_aranges)
  .debug_aranges
-                0x0000000000000000       0xa8 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
+                0x0000000000000000       0x40 ./system/src/stm32f1-stdperiph/misc.o
  .debug_aranges
-                0x00000000000000a8      0x118 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
+                0x0000000000000040       0xa8 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
  .debug_aranges
-                0x00000000000001c0       0x28 ./system/src/newlib/_exit.o
+                0x00000000000000e8      0x118 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
  .debug_aranges
-                0x00000000000001e8       0x40 ./system/src/newlib/_startup.o
+                0x0000000000000200       0x28 ./system/src/newlib/_exit.o
  .debug_aranges
-                0x0000000000000228       0x30 ./system/src/newlib/_syscalls.o
+                0x0000000000000228       0x40 ./system/src/newlib/_startup.o
  .debug_aranges
-                0x0000000000000258       0x28 ./system/src/cortexm/_initialize_hardware.o
+                0x0000000000000268       0x30 ./system/src/newlib/_syscalls.o
  .debug_aranges
-                0x0000000000000280       0x20 ./system/src/cortexm/_reset_hardware.o
+                0x0000000000000298       0x28 ./system/src/cortexm/_initialize_hardware.o
  .debug_aranges
-                0x00000000000002a0       0x80 ./system/src/cortexm/exception_handlers.o
+                0x00000000000002c0       0x20 ./system/src/cortexm/_reset_hardware.o
  .debug_aranges
-                0x0000000000000320       0x28 ./system/src/cmsis/system_stm32f10x.o
+                0x00000000000002e0       0x80 ./system/src/cortexm/exception_handlers.o
  .debug_aranges
-                0x0000000000000348       0x20 ./system/src/cmsis/vectors_stm32f10x.o
+                0x0000000000000360       0x28 ./system/src/cmsis/system_stm32f10x.o
  .debug_aranges
-                0x0000000000000368       0x40 ./src_lib/delay.o
+                0x0000000000000388       0x20 ./system/src/cmsis/vectors_stm32f10x.o
  .debug_aranges
-                0x00000000000003a8       0x18 ./src/descriptor.o
+                0x00000000000003a8       0x40 ./src_lib/delay.o
  .debug_aranges
-                0x00000000000003c0       0x30 ./src/hw_init.o
+                0x00000000000003e8       0x18 ./src/descriptor.o
  .debug_aranges
-                0x00000000000003f0       0x28 ./src/main.o
+                0x0000000000000400       0x68 ./src/disp.o
  .debug_aranges
-                0x0000000000000418       0xd8 ./src/usb.o
+                0x0000000000000468       0x40 ./src/hw_init.o
  .debug_aranges
-                0x00000000000004f0       0x90 ./src/usbcore.o
+                0x00000000000004a8       0x28 ./src/main.o
+ .debug_aranges
+                0x00000000000004d0       0xd8 ./src/usb.o
+ .debug_aranges
+                0x00000000000005a8       0x90 ./src/usbcore.o
 
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x0000000000000000     0x4c6f
+.debug_info     0x0000000000000000     0x5fe7
  *(.debug_info .gnu.linkonce.wi.*)
- .debug_info    0x0000000000000000      0x7c7 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
- .debug_info    0x00000000000007c7      0x8af ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
- .debug_info    0x0000000000001076      0x104 ./system/src/newlib/_exit.o
- .debug_info    0x000000000000117a      0x3f2 ./system/src/newlib/_startup.o
- .debug_info    0x000000000000156c      0x1c3 ./system/src/newlib/_syscalls.o
- .debug_info    0x000000000000172f      0x2ad ./system/src/cortexm/_initialize_hardware.o
- .debug_info    0x00000000000019dc      0x2bf ./system/src/cortexm/_reset_hardware.o
- .debug_info    0x0000000000001c9b      0x264 ./system/src/cortexm/exception_handlers.o
- .debug_info    0x0000000000001eff      0x49c ./system/src/cmsis/system_stm32f10x.o
- .debug_info    0x000000000000239b       0xcd ./system/src/cmsis/vectors_stm32f10x.o
- .debug_info    0x0000000000002468      0x66e ./src_lib/delay.o
- .debug_info    0x0000000000002ad6      0x17b ./src/descriptor.o
- .debug_info    0x0000000000002c51      0x745 ./src/hw_init.o
- .debug_info    0x0000000000003396      0x2a0 ./src/main.o
- .debug_info    0x0000000000003636      0xb13 ./src/usb.o
- .debug_info    0x0000000000004149      0xb26 ./src/usbcore.o
+ .debug_info    0x0000000000000000      0x53d ./system/src/stm32f1-stdperiph/misc.o
+ .debug_info    0x000000000000053d      0x7c7 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
+ .debug_info    0x0000000000000d04      0x8af ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
+ .debug_info    0x00000000000015b3      0x104 ./system/src/newlib/_exit.o
+ .debug_info    0x00000000000016b7      0x3f2 ./system/src/newlib/_startup.o
+ .debug_info    0x0000000000001aa9      0x1c3 ./system/src/newlib/_syscalls.o
+ .debug_info    0x0000000000001c6c      0x2ad ./system/src/cortexm/_initialize_hardware.o
+ .debug_info    0x0000000000001f19      0x2bf ./system/src/cortexm/_reset_hardware.o
+ .debug_info    0x00000000000021d8      0x264 ./system/src/cortexm/exception_handlers.o
+ .debug_info    0x000000000000243c      0x49c ./system/src/cmsis/system_stm32f10x.o
+ .debug_info    0x00000000000028d8       0xcd ./system/src/cmsis/vectors_stm32f10x.o
+ .debug_info    0x00000000000029a5      0x66e ./src_lib/delay.o
+ .debug_info    0x0000000000003013      0x17b ./src/descriptor.o
+ .debug_info    0x000000000000318e      0xaa2 ./src/disp.o
+ .debug_info    0x0000000000003c30      0xa59 ./src/hw_init.o
+ .debug_info    0x0000000000004689      0x2b4 ./src/main.o
+ .debug_info    0x000000000000493d      0xb84 ./src/usb.o
+ .debug_info    0x00000000000054c1      0xb26 ./src/usbcore.o
 
-.debug_abbrev   0x0000000000000000     0x175a
+.debug_abbrev   0x0000000000000000     0x1bcd
  *(.debug_abbrev)
- .debug_abbrev  0x0000000000000000      0x200 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
- .debug_abbrev  0x0000000000000200      0x1e4 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
- .debug_abbrev  0x00000000000003e4       0xbb ./system/src/newlib/_exit.o
- .debug_abbrev  0x000000000000049f      0x19e ./system/src/newlib/_startup.o
- .debug_abbrev  0x000000000000063d       0xe9 ./system/src/newlib/_syscalls.o
- .debug_abbrev  0x0000000000000726       0xf5 ./system/src/cortexm/_initialize_hardware.o
- .debug_abbrev  0x000000000000081b       0xfc ./system/src/cortexm/_reset_hardware.o
- .debug_abbrev  0x0000000000000917       0xdc ./system/src/cortexm/exception_handlers.o
- .debug_abbrev  0x00000000000009f3      0x170 ./system/src/cmsis/system_stm32f10x.o
- .debug_abbrev  0x0000000000000b63       0x9a ./system/src/cmsis/vectors_stm32f10x.o
- .debug_abbrev  0x0000000000000bfd      0x1ca ./src_lib/delay.o
- .debug_abbrev  0x0000000000000dc7       0x75 ./src/descriptor.o
- .debug_abbrev  0x0000000000000e3c      0x235 ./src/hw_init.o
- .debug_abbrev  0x0000000000001071      0x14f ./src/main.o
- .debug_abbrev  0x00000000000011c0      0x2c4 ./src/usb.o
- .debug_abbrev  0x0000000000001484      0x2d6 ./src/usbcore.o
+ .debug_abbrev  0x0000000000000000      0x158 ./system/src/stm32f1-stdperiph/misc.o
+ .debug_abbrev  0x0000000000000158      0x200 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
+ .debug_abbrev  0x0000000000000358      0x1e4 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
+ .debug_abbrev  0x000000000000053c       0xbb ./system/src/newlib/_exit.o
+ .debug_abbrev  0x00000000000005f7      0x19e ./system/src/newlib/_startup.o
+ .debug_abbrev  0x0000000000000795       0xe9 ./system/src/newlib/_syscalls.o
+ .debug_abbrev  0x000000000000087e       0xf5 ./system/src/cortexm/_initialize_hardware.o
+ .debug_abbrev  0x0000000000000973       0xfc ./system/src/cortexm/_reset_hardware.o
+ .debug_abbrev  0x0000000000000a6f       0xdc ./system/src/cortexm/exception_handlers.o
+ .debug_abbrev  0x0000000000000b4b      0x170 ./system/src/cmsis/system_stm32f10x.o
+ .debug_abbrev  0x0000000000000cbb       0x9a ./system/src/cmsis/vectors_stm32f10x.o
+ .debug_abbrev  0x0000000000000d55      0x1ca ./src_lib/delay.o
+ .debug_abbrev  0x0000000000000f1f       0x75 ./src/descriptor.o
+ .debug_abbrev  0x0000000000000f94      0x29a ./src/disp.o
+ .debug_abbrev  0x000000000000122e      0x29a ./src/hw_init.o
+ .debug_abbrev  0x00000000000014c8      0x14f ./src/main.o
+ .debug_abbrev  0x0000000000001617      0x2e0 ./src/usb.o
+ .debug_abbrev  0x00000000000018f7      0x2d6 ./src/usbcore.o
 
-.debug_line     0x0000000000000000     0x19e5
+.debug_line     0x0000000000000000     0x1dfa
  *(.debug_line)
- .debug_line    0x0000000000000000      0x2ed ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
- .debug_line    0x00000000000002ed      0x3c3 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
- .debug_line    0x00000000000006b0      0x117 ./system/src/newlib/_exit.o
- .debug_line    0x00000000000007c7      0x100 ./system/src/newlib/_startup.o
- .debug_line    0x00000000000008c7      0x132 ./system/src/newlib/_syscalls.o
- .debug_line    0x00000000000009f9      0x107 ./system/src/cortexm/_initialize_hardware.o
- .debug_line    0x0000000000000b00      0x100 ./system/src/cortexm/_reset_hardware.o
- .debug_line    0x0000000000000c00      0x139 ./system/src/cortexm/exception_handlers.o
- .debug_line    0x0000000000000d39      0x139 ./system/src/cmsis/system_stm32f10x.o
- .debug_line    0x0000000000000e72       0x58 ./system/src/cmsis/vectors_stm32f10x.o
- .debug_line    0x0000000000000eca      0x19d ./src_lib/delay.o
- .debug_line    0x0000000000001067       0xb6 ./src/descriptor.o
- .debug_line    0x000000000000111d      0x175 ./src/hw_init.o
- .debug_line    0x0000000000001292      0x197 ./src/main.o
- .debug_line    0x0000000000001429      0x307 ./src/usb.o
- .debug_line    0x0000000000001730      0x2b5 ./src/usbcore.o
+ .debug_line    0x0000000000000000      0x181 ./system/src/stm32f1-stdperiph/misc.o
+ .debug_line    0x0000000000000181      0x2ed ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
+ .debug_line    0x000000000000046e      0x3c3 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
+ .debug_line    0x0000000000000831      0x117 ./system/src/newlib/_exit.o
+ .debug_line    0x0000000000000948      0x100 ./system/src/newlib/_startup.o
+ .debug_line    0x0000000000000a48      0x132 ./system/src/newlib/_syscalls.o
+ .debug_line    0x0000000000000b7a      0x107 ./system/src/cortexm/_initialize_hardware.o
+ .debug_line    0x0000000000000c81      0x100 ./system/src/cortexm/_reset_hardware.o
+ .debug_line    0x0000000000000d81      0x139 ./system/src/cortexm/exception_handlers.o
+ .debug_line    0x0000000000000eba      0x139 ./system/src/cmsis/system_stm32f10x.o
+ .debug_line    0x0000000000000ff3       0x58 ./system/src/cmsis/vectors_stm32f10x.o
+ .debug_line    0x000000000000104b      0x19e ./src_lib/delay.o
+ .debug_line    0x00000000000011e9       0xb6 ./src/descriptor.o
+ .debug_line    0x000000000000129f      0x237 ./src/disp.o
+ .debug_line    0x00000000000014d6      0x1c4 ./src/hw_init.o
+ .debug_line    0x000000000000169a      0x1a2 ./src/main.o
+ .debug_line    0x000000000000183c      0x309 ./src/usb.o
+ .debug_line    0x0000000000001b45      0x2b5 ./src/usbcore.o
 
-.debug_frame    0x0000000000000000      0xb40
+.debug_frame    0x0000000000000000      0xce0
  *(.debug_frame)
- .debug_frame   0x0000000000000000      0x170 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
- .debug_frame   0x0000000000000170      0x220 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
- .debug_frame   0x0000000000000390       0x40 ./system/src/newlib/_exit.o
- .debug_frame   0x00000000000003d0       0x80 ./system/src/newlib/_startup.o
- .debug_frame   0x0000000000000450       0x50 ./system/src/newlib/_syscalls.o
- .debug_frame   0x00000000000004a0       0x38 ./system/src/cortexm/_initialize_hardware.o
- .debug_frame   0x00000000000004d8       0x20 ./system/src/cortexm/_reset_hardware.o
- .debug_frame   0x00000000000004f8       0xe0 ./system/src/cortexm/exception_handlers.o
- .debug_frame   0x00000000000005d8       0x3c ./system/src/cmsis/system_stm32f10x.o
- .debug_frame   0x0000000000000614       0x20 ./system/src/cmsis/vectors_stm32f10x.o
- .debug_frame   0x0000000000000634       0x68 ./src_lib/delay.o
- .debug_frame   0x000000000000069c       0x58 ./src/hw_init.o
- .debug_frame   0x00000000000006f4       0x38 ./src/main.o
- .debug_frame   0x000000000000072c      0x1e8 ./src/usb.o
- .debug_frame   0x0000000000000914      0x22c ./src/usbcore.o
+ .debug_frame   0x0000000000000000       0x68 ./system/src/stm32f1-stdperiph/misc.o
+ .debug_frame   0x0000000000000068      0x170 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
+ .debug_frame   0x00000000000001d8      0x220 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
+ .debug_frame   0x00000000000003f8       0x40 ./system/src/newlib/_exit.o
+ .debug_frame   0x0000000000000438       0x80 ./system/src/newlib/_startup.o
+ .debug_frame   0x00000000000004b8       0x50 ./system/src/newlib/_syscalls.o
+ .debug_frame   0x0000000000000508       0x38 ./system/src/cortexm/_initialize_hardware.o
+ .debug_frame   0x0000000000000540       0x20 ./system/src/cortexm/_reset_hardware.o
+ .debug_frame   0x0000000000000560       0xe0 ./system/src/cortexm/exception_handlers.o
+ .debug_frame   0x0000000000000640       0x3c ./system/src/cmsis/system_stm32f10x.o
+ .debug_frame   0x000000000000067c       0x20 ./system/src/cmsis/vectors_stm32f10x.o
+ .debug_frame   0x000000000000069c       0x68 ./src_lib/delay.o
+ .debug_frame   0x0000000000000704      0x110 ./src/disp.o
+ .debug_frame   0x0000000000000814       0x80 ./src/hw_init.o
+ .debug_frame   0x0000000000000894       0x38 ./src/main.o
+ .debug_frame   0x00000000000008cc      0x1e8 ./src/usb.o
+ .debug_frame   0x0000000000000ab4      0x22c ./src/usbcore.o
 
-.debug_str      0x0000000000000000     0x16b0
+.debug_str      0x0000000000000000     0x1990
  *(.debug_str)
- .debug_str     0x0000000000000000      0x536 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
+ .debug_str     0x0000000000000000      0x3cf ./system/src/stm32f1-stdperiph/misc.o
+                                        0x41c (size before relaxing)
+ .debug_str     0x00000000000003cf      0x39c ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
                                         0x583 (size before relaxing)
- .debug_str     0x0000000000000536      0x42a ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
+ .debug_str     0x000000000000076b      0x42a ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
                                         0x66d (size before relaxing)
- .debug_str     0x0000000000000960       0x56 ./system/src/newlib/_exit.o
+ .debug_str     0x0000000000000b95       0x56 ./system/src/newlib/_exit.o
                                         0x1ea (size before relaxing)
- .debug_str     0x00000000000009b6      0x16d ./system/src/newlib/_startup.o
+ .debug_str     0x0000000000000beb      0x16d ./system/src/newlib/_startup.o
                                         0x32f (size before relaxing)
- .debug_str     0x0000000000000b23       0x5c ./system/src/newlib/_syscalls.o
+ .debug_str     0x0000000000000d58       0x5c ./system/src/newlib/_syscalls.o
                                         0x21f (size before relaxing)
- .debug_str     0x0000000000000b7f       0xb2 ./system/src/cortexm/_initialize_hardware.o
+ .debug_str     0x0000000000000db4       0x5e ./system/src/cortexm/_initialize_hardware.o
                                         0x2a3 (size before relaxing)
- .debug_str     0x0000000000000c31       0x45 ./system/src/cortexm/_reset_hardware.o
+ .debug_str     0x0000000000000e12       0x45 ./system/src/cortexm/_reset_hardware.o
                                         0x269 (size before relaxing)
- .debug_str     0x0000000000000c76      0x11f ./system/src/cortexm/exception_handlers.o
+ .debug_str     0x0000000000000e57      0x11f ./system/src/cortexm/exception_handlers.o
                                         0x2dd (size before relaxing)
- .debug_str     0x0000000000000d95       0x77 ./system/src/cmsis/system_stm32f10x.o
+ .debug_str     0x0000000000000f76       0x77 ./system/src/cmsis/system_stm32f10x.o
                                         0x337 (size before relaxing)
- .debug_str     0x0000000000000e0c       0x57 ./system/src/cmsis/vectors_stm32f10x.o
+ .debug_str     0x0000000000000fed       0x57 ./system/src/cmsis/vectors_stm32f10x.o
                                         0x1e6 (size before relaxing)
- .debug_str     0x0000000000000e63      0x3fe ./src_lib/delay.o
+ .debug_str     0x0000000000001044      0x37f ./src_lib/delay.o
                                         0x63f (size before relaxing)
- .debug_str     0x0000000000001261       0x6b ./src/descriptor.o
+ .debug_str     0x00000000000013c3       0x6b ./src/descriptor.o
                                         0x217 (size before relaxing)
- .debug_str     0x00000000000012cc       0x67 ./src/hw_init.o
-                                        0x734 (size before relaxing)
- .debug_str     0x0000000000001333       0x55 ./src/main.o
-                                        0x27b (size before relaxing)
- .debug_str     0x0000000000001388      0x1da ./src/usb.o
-                                        0x705 (size before relaxing)
- .debug_str     0x0000000000001562      0x14e ./src/usbcore.o
+ .debug_str     0x000000000000142e      0x175 ./src/disp.o
+                                        0x6cd (size before relaxing)
+ .debug_str     0x00000000000015a3       0x70 ./src/hw_init.o
+                                        0x7da (size before relaxing)
+ .debug_str     0x0000000000001613       0x55 ./src/main.o
+                                        0x284 (size before relaxing)
+ .debug_str     0x0000000000001668      0x1da ./src/usb.o
+                                        0x71c (size before relaxing)
+ .debug_str     0x0000000000001842      0x14e ./src/usbcore.o
                                         0x457 (size before relaxing)
 
-.debug_loc      0x0000000000000000     0x1885
+.debug_loc      0x0000000000000000     0x1cce
  *(.debug_loc)
- .debug_loc     0x0000000000000000      0x4ed ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
- .debug_loc     0x00000000000004ed      0x672 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
- .debug_loc     0x0000000000000b5f       0x21 ./system/src/newlib/_exit.o
- .debug_loc     0x0000000000000b80      0x234 ./system/src/newlib/_startup.o
- .debug_loc     0x0000000000000db4       0x63 ./system/src/newlib/_syscalls.o
- .debug_loc     0x0000000000000e17       0x99 ./system/src/cmsis/system_stm32f10x.o
- .debug_loc     0x0000000000000eb0       0x88 ./src_lib/delay.o
- .debug_loc     0x0000000000000f38       0x8b ./src/hw_init.o
- .debug_loc     0x0000000000000fc3       0x42 ./src/main.o
- .debug_loc     0x0000000000001005      0x5eb ./src/usb.o
- .debug_loc     0x00000000000015f0      0x295 ./src/usbcore.o
+ .debug_loc     0x0000000000000000      0x161 ./system/src/stm32f1-stdperiph/misc.o
+ .debug_loc     0x0000000000000161      0x4ed ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
+ .debug_loc     0x000000000000064e      0x672 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
+ .debug_loc     0x0000000000000cc0       0x21 ./system/src/newlib/_exit.o
+ .debug_loc     0x0000000000000ce1      0x234 ./system/src/newlib/_startup.o
+ .debug_loc     0x0000000000000f15       0x63 ./system/src/newlib/_syscalls.o
+ .debug_loc     0x0000000000000f78       0x99 ./system/src/cmsis/system_stm32f10x.o
+ .debug_loc     0x0000000000001011       0x88 ./src_lib/delay.o
+ .debug_loc     0x0000000000001099      0x20c ./src/disp.o
+ .debug_loc     0x00000000000012a5      0x167 ./src/hw_init.o
+ .debug_loc     0x000000000000140c       0x42 ./src/main.o
+ .debug_loc     0x000000000000144e      0x5eb ./src/usb.o
+ .debug_loc     0x0000000000001a39      0x295 ./src/usbcore.o
 
 .debug_macinfo
  *(.debug_macinfo)
@@ -1100,19 +1152,21 @@ END GROUP
  *(.debug_varnames)
 OUTPUT(tstusb.elf elf32-littlearm)
 
-.debug_ranges   0x0000000000000000      0x5c0
- .debug_ranges  0x0000000000000000       0x98 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
- .debug_ranges  0x0000000000000098      0x108 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
- .debug_ranges  0x00000000000001a0       0x18 ./system/src/newlib/_exit.o
- .debug_ranges  0x00000000000001b8       0x48 ./system/src/newlib/_startup.o
- .debug_ranges  0x0000000000000200       0x20 ./system/src/newlib/_syscalls.o
- .debug_ranges  0x0000000000000220       0x18 ./system/src/cortexm/_initialize_hardware.o
- .debug_ranges  0x0000000000000238       0x10 ./system/src/cortexm/_reset_hardware.o
- .debug_ranges  0x0000000000000248       0x70 ./system/src/cortexm/exception_handlers.o
- .debug_ranges  0x00000000000002b8       0x30 ./system/src/cmsis/system_stm32f10x.o
- .debug_ranges  0x00000000000002e8       0x10 ./system/src/cmsis/vectors_stm32f10x.o
- .debug_ranges  0x00000000000002f8       0x60 ./src_lib/delay.o
- .debug_ranges  0x0000000000000358       0x20 ./src/hw_init.o
- .debug_ranges  0x0000000000000378       0x18 ./src/main.o
- .debug_ranges  0x0000000000000390      0x198 ./src/usb.o
- .debug_ranges  0x0000000000000528       0x98 ./src/usbcore.o
+.debug_ranges   0x0000000000000000      0x6e8
+ .debug_ranges  0x0000000000000000       0x30 ./system/src/stm32f1-stdperiph/misc.o
+ .debug_ranges  0x0000000000000030       0x98 ./system/src/stm32f1-stdperiph/stm32f10x_gpio.o
+ .debug_ranges  0x00000000000000c8      0x108 ./system/src/stm32f1-stdperiph/stm32f10x_rcc.o
+ .debug_ranges  0x00000000000001d0       0x18 ./system/src/newlib/_exit.o
+ .debug_ranges  0x00000000000001e8       0x48 ./system/src/newlib/_startup.o
+ .debug_ranges  0x0000000000000230       0x20 ./system/src/newlib/_syscalls.o
+ .debug_ranges  0x0000000000000250       0x18 ./system/src/cortexm/_initialize_hardware.o
+ .debug_ranges  0x0000000000000268       0x10 ./system/src/cortexm/_reset_hardware.o
+ .debug_ranges  0x0000000000000278       0x70 ./system/src/cortexm/exception_handlers.o
+ .debug_ranges  0x00000000000002e8       0x30 ./system/src/cmsis/system_stm32f10x.o
+ .debug_ranges  0x0000000000000318       0x10 ./system/src/cmsis/vectors_stm32f10x.o
+ .debug_ranges  0x0000000000000328       0x60 ./src_lib/delay.o
+ .debug_ranges  0x0000000000000388       0x88 ./src/disp.o
+ .debug_ranges  0x0000000000000410       0x90 ./src/hw_init.o
+ .debug_ranges  0x00000000000004a0       0x18 ./src/main.o
+ .debug_ranges  0x00000000000004b8      0x198 ./src/usb.o
+ .debug_ranges  0x0000000000000650       0x98 ./src/usbcore.o

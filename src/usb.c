@@ -27,7 +27,7 @@ void usb_init() {
 	USB->DADDR = 0;
 	USB->CNTR = (1 << 10);
 	USB->ISTR = 0;
-//	GPIOC->CRL |= GPIO_CRL_MODE7_1;
+	GPIOC->CRL |= GPIO_CRL_MODE7_1;
 }
 
 void usb_deinit(){

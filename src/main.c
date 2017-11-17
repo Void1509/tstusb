@@ -13,6 +13,7 @@
 #include "string.h"
 #include "myDelay.h"
 #include "usb.h"
+#include "lcd8.h"
 
 // ----------------------------------------------------------------------------
 //
@@ -34,6 +35,7 @@
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #pragma GCC diagnostic ignored "-Wreturn-type"
 
+uint8_t getkey();
 
 extern uint8_t usbconn;
 //void initialise_monitor_handles(void);
@@ -61,8 +63,10 @@ int main(int argc, char* argv[]) {
 	// Infinite loop
 	myDelay(2000);
 	usb_init();
+	lcd_init();
 	LED_ON(0);
 	while (1) {
+
 /*
 		if (usbconn) {
 			usb_init();

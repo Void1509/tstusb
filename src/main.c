@@ -37,7 +37,7 @@
 
 uint8_t getkey();
 
-extern uint8_t usbconn;
+//extern uint8_t usbconn;
 //void initialise_monitor_handles(void);
 void hw_init();
 
@@ -64,9 +64,17 @@ int main(int argc, char* argv[]) {
 	myDelay(2000);
 	usb_init();
 	lcd_init();
-	LED_ON(0);
+//	LED_ON(0);
+	lcd_str("Hello World !!!");
+	lcd_cmd(0xC0);lcd_str("From Valeriy !!!");
+	lcd_cmd(0x94);lcd_str("Kherson 2017");
+	lcd_cmd(0xD4);lcd_str("Universal");
+
 	while (1) {
 
+		if ((tmp = getkey())) {
+			if (tmp == 0x30) lcd_cmd(0x1);
+		}
 /*
 		if (usbconn) {
 			usb_init();
@@ -76,36 +84,45 @@ int main(int argc, char* argv[]) {
 			LED_OFF(0);
 		}
 */
-/*
+
 		if (getCommCount()) {
 			tmp = getCommBuff(comm);
 			comm[tmp] = 0;
+			lcd_str((const char*)comm);
+/*
 			if (!strcmp((const char*)comm,"q1\n")) send = 1;
 			if (!strcmp((const char*)comm,"q0\n")) send = 2;
 			if (!strcmp((const char*)comm,"w1\n")) send = 3;
 			if (!strcmp((const char*)comm,"w0\n")) send = 4;
+*/
 		}
+/*
 		switch (send) {
 			case 1:
-				sendCommBuff((uint8_t*)"Hello world!!!\n",15);
+//				sendCommBuff((uint8_t*)"Hello world!!!\n",15);
+				lcd_str(" send q1 ");
 				send = 0;
 				break;
 			case 2:
-				sendCommBuff((uint8_t*)"Hello off     \n",15);
+//				sendCommBuff((uint8_t*)"Hello off     \n",15);
+				lcd_str(" send q0 ");
 				send = 0;
 				break;
 			case 3:
-				sendCommBuff((uint8_t*)"Valera on     \n",15);
+//				sendCommBuff((uint8_t*)"Valera on     \n",15);
+				lcd_str(" send w1 ");
 				send = 0;
 				break;
 			case 4:
-				sendCommBuff((uint8_t*)"Valera off    \n",15);
+//				sendCommBuff((uint8_t*)"Valera off    \n",15);
+				lcd_str(" send w0 ");
 				send = 0;
 				break;
 			default:
 				break;
 		}
 */
+
 		myDelay(100);
 
 //		if (GPIOC->IDR & (1 << 11)) LED_ON; else LED_OFF;

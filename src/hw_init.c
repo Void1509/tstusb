@@ -40,27 +40,12 @@ void hw_init() {
 	GPIOC->CRL &= 0xffffff00;
 	GPIOC->CRL |= 0x88;
 	GPIOC->ODR = 3;
-	AFIO->MAPR = 0x22;
+	AFIO->EXTICR[0] = 0x22;
 	EXTI->IMR = 3;
 	EXTI->FTSR = 3;
 	NVIC_EnableIRQ(EXTI0_IRQn);
 	NVIC_EnableIRQ(EXTI1_IRQn);
 	key = 0;
-	/*
-	 // port B init (leds) open Drain
-	 GPIOB->ODR |= 1;
-	 GPIOB->CRL |= 1;
-	 GPIOC->ODR |= (1 << 13);
-	 GPIOC->CRH |= (1 << 20);
-	 AFIO->EXTICR[0] |= (1 << 4);
-
-	 EXTI->IMR |= EXTI_IMR_MR1;
-	 EXTI->RTSR |= EXTI_RTSR_TR1;
-	 EXTI->FTSR |= EXTI_FTSR_TR1;
-	 NVIC_EnableIRQ(EXTI1_IRQn);
-	 usbconn = 0;
-	 */
-
 }
 
 uint8_t getkey() {
@@ -83,14 +68,3 @@ void EXTI0_IRQHandler() {
 	}
 }
 
-void intToUni(uint32_t ui, uint8_t *buf, uint8_t len) {
-
-	uint8_t i1, i2;
-
-	for (i1 = 0; i1 < len; i1++) {
-		i2 = ui >> 28;
-		buf[2 * i1] = i2 + (i2 < 0xa) ? '0' : ('A' - 10);
-		ui <<= 4;
-		buf[(2 * i1) + 1] = 0;
-	}
-}

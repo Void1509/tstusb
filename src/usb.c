@@ -130,7 +130,7 @@ void tableInit() {
 
 	setTableTx(2, tstart + 88, 8);			// IN 2 (82)
 
-	setTableRx(3, tstart + 96, RXCNT(0, 4));		// OUT 3(3)
+	setTableRx(3, tstart + 96, RXCNT(0, 8));		// OUT 3(3)
 }
 
 void ep_init() {

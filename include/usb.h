@@ -116,6 +116,7 @@ void toggleTx(uint8_t ep);
 
 void usb_init();
 void usb_deinit();
+uint8_t testUSB();
 void setStatTx(uint8_t ep, uint16_t stat);
 void setStatRx(uint8_t ep, uint16_t stat);
 uint16_t getTableTxAddr(uint8_t ep);

@@ -20,6 +20,7 @@
 #define	POST0		2
 #define	POSTDATA		3
 #define BUF0SIZE		8
+
 void ep_init();
 #pragma pack(push,1)
 union {
@@ -49,7 +50,7 @@ static uint16_t DeviceAddress, saveTXst, saveRXst;
 const uint8_t *strdesc[] = { StringLangID, StringVendor, StringProduct,
 		StringSerial };
 
-static uint16_t stat, in_stat, bmap;
+uint16_t stat, in_stat, bmap;
 void EP0Interrupt();
 void getDesc();
 void setup_process();
@@ -162,7 +163,8 @@ void EP0Interrupt() {
 			saveTXst = VALID;
 		} else {
 			if (DeviceAddress && ((USB->DADDR & 0x7f) == 0)) {
-				USB->DADDR = 0x80 | DeviceAddress;
+				USB->DADDR = 0x80 | DeviceAddress;			// Задать адрес
+				USB->CNTR |= 0x800;							// Включить суспенд
 			}
 			setTxCount(0, 0);
 			saveTXst = NAK;

@@ -36,10 +36,26 @@
 #pragma GCC diagnostic ignored "-Wreturn-type"
 
 uint8_t getkey();
+void beep();
 
+uint8_t const chr[]={8,26,18,25,37,32,28};
 //extern uint8_t usbconn;
 //void initialise_monitor_handles(void);
 void hw_init();
+
+void lcd_prn() {
+	lcd_cmd(LCD0);lcd_str("\10\11u\12epca\13b\11a\14 ");// Нельзя заканчивать строку на графический символ
+	lcd_cmd(LCD1);lcd_str("Tec\16 Ma\15u\11a");
+	lcd_cmd(LCD2);lcd_str("Xepco\11 2017");
+
+
+/*
+	lcd_cmd(LCD0);lcd_str("Hello world !!!");
+	lcd_cmd(LCD1);lcd_str("From Valera !");
+	lcd_cmd(LCD2);lcd_str("Kherson 2017");
+	lcd_cmd(LCD3);lcd_str("Universal");
+*/
+}
 
 int main(int argc, char* argv[]) {
 //	initialise_monitor_handles();
@@ -49,9 +65,12 @@ int main(int argc, char* argv[]) {
 	uint8_t tmp;
 	uint8_t send = 0;
 
-
 	myDelay_init();
 	hw_init();
+	usb_init();
+	lcd_init();//myDelay(10);
+
+
 //	NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
 /*
 	LED_ON(8);
@@ -61,34 +80,30 @@ int main(int argc, char* argv[]) {
 //	printf("Hello Semi\n");
 //	trace_puts("Hello ARM World!");
 	// Infinite loop
-	myDelay(2000);
-	usb_init();
-	lcd_init();
+//
 //	LED_ON(0);
-	lcd_str("Hello World !!!");
-	lcd_cmd(0xC0);lcd_str("From Valeriy !!!");
-	lcd_cmd(0x94);lcd_str("Kherson 2017");
-	lcd_cmd(0xD4);lcd_str("Universal");
+	lcd_loadfont(chr,7);//myDelay(10);
+
+	lcd_prn();
 
 	while (1) {
 
 		if ((tmp = getkey())) {
-			if (tmp == 0x30) lcd_cmd(0x1);
+			if (tmp == 0x30) lcd_cmd(LCLS);
+			if (tmp == 0x31) {
+//				lcd_cmd(LCD0);
+				lcd_prn();
+			}
+			beep();
 		}
-/*
-		if (usbconn) {
-			usb_init();
-			LED_ON(0);
-		} else {
-			usb_deinit();
-			LED_OFF(0);
-		}
-*/
-
+		lcd_cmd(LCD0 + 16);
+		//if (testUSB()) lcd_str("USB"); else lcd_str("   ");
 		if (getCommCount()) {
 			tmp = getCommBuff(comm);
 			comm[tmp] = 0;
 			lcd_str((const char*)comm);
+			sendCommBuff((uint8_t*)comm,tmp);
+			beep();
 /*
 			if (!strcmp((const char*)comm,"q1\n")) send = 1;
 			if (!strcmp((const char*)comm,"q0\n")) send = 2;

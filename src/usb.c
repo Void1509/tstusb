@@ -8,6 +8,8 @@
 #include "usb.h"
 #define BLSIZE		0x8000
 
+void beep();
+
 void usb_ctr_int();
 void usb_pma_int();
 void usb_err_int();
@@ -15,17 +17,18 @@ void usb_reset_int();
 void usb_sof_int();
 void usb_esof_int();
 
-volatile uint16_t intStat;
-
 BTable *table = (BTable*) USB_PBUFFER;
 PBElement *PBuffer = (PBElement*) USB_PBUFFER;
 
+/***************************************
+ * Инициализация перефириии USB
+ ***************************************/
+
 void usb_init() {
-	intStat = 0;
 	NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
 	USB->BTABLE = 0;
 	USB->DADDR = 0;
-	USB->CNTR = (1 << 10);
+	USB->CNTR = 0x400;
 	USB->ISTR = 0;
 	GPIOC->CRL |= GPIO_CRL_MODE7_1;
 }
@@ -34,7 +37,10 @@ void usb_deinit(){
 	NVIC_DisableIRQ(USB_LP_CAN1_RX0_IRQn);
 	USB->CNTR = 3;
 }
-
+uint8_t testUSB() {
+	if (USB->DADDR & 0x7f) return (1);
+	return (0);
+}
 void setkind() {
 	uint16_t tmp = USB->EPR[0] & 0x868f;
 	tmp |= 0x100;
@@ -149,6 +155,14 @@ void ep_init() {
 	USB->DADDR = 0x80;
 }
 
+void usb_susp_int() {
+	if (USB->DADDR & 0x7f) {
+		//beep();
+		USB->DADDR = 0;
+		USB->CNTR &= ~ 0x800;
+	}
+}
+
 void USB_LP_CAN1_RX0_IRQHandler() {
 	if (USB->ISTR & (1 << 15)) {
 		usb_ctr_int();
@@ -163,6 +177,11 @@ void USB_LP_CAN1_RX0_IRQHandler() {
 	if (USB->ISTR & (1 << 13)) {
 		usb_err_int();
 		USB->ISTR = ~(1 << 13);
+		return;
+	}
+	if (USB->ISTR & (1 << 11)) {
+		usb_susp_int();
+		USB->ISTR = ~(1 << 11);
 		return;
 	}
 

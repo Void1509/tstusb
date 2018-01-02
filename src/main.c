@@ -37,16 +37,40 @@
 
 uint8_t getkey();
 void beep();
+void hw_init();
+void parser(uint8_t *str);
 
-uint8_t const chr[]={8,26,18,25,37,32,28};
+static uint8_t usbconn;
+static uint8_t way = 0;		//направление лево право
+static uint16_t speed = 1000;   //скорость
+
+uint8_t const chr[]={18,25,26,27,28,33};
 //extern uint8_t usbconn;
 //void initialise_monitor_handles(void);
-void hw_init();
+static void lcd_prn_way();
+static void lcd_prn_speed();
 
-void lcd_prn() {
-	lcd_cmd(LCD0);lcd_str("\10\11u\12epca\13b\11a\14 ");// Нельзя заканчивать строку на графический символ
-	lcd_cmd(LCD1);lcd_str("Tec\16 Ma\15u\11a");
-	lcd_cmd(LCD2);lcd_str("Xepco\11 2017");
+void set_speed(uint16_t spd) {
+	speed = spd;
+	lcd_prn_speed();
+}
+void set_way(uint16_t w) {
+	way = w;
+	lcd_prn_way();
+}
+
+void lcd_prn_usb() {
+	lcd_cmd(LCD0 + 16);
+	if (usbconn) lcd_str("USB"); else lcd_str("   ");
+}
+
+static void lcd_prn() {
+	lcd_prn_usb();
+	lcd_cmd(LCD1);lcd_str("nepeme\15e\12ue cynnop\14a");// Нельзя заканчивать строку на графический символ
+	lcd_cmd(LCD2);lcd_str("\12anpa\10\11e\12ue ckopoc\14b");
+	lcd_prn_way();
+	lcd_prn_speed();
+//	lcd_cmd(LCD3);lcd_str("Xepco\12 2017");
 
 
 /*
@@ -56,101 +80,84 @@ void lcd_prn() {
 	lcd_cmd(LCD3);lcd_str("Universal");
 */
 }
+static void lcd_prn_way() {
+	lcd_cmd(LCD3+2);
+	if (way) lcd_str("npa\10o"); else lcd_str("\11e\10o ");
+}
+static void lcd_prn_speed() {
+	char str[8];
+	lcd_cmd(LCD3+12);
+	sprintf(str,"%8d",speed);
+	lcd_str(str);
+}
+
 
 int main(int argc, char* argv[]) {
 //	initialise_monitor_handles();
 	// At this stage the system clock should have already been configured
 	// at high speed.
 	uint8_t comm[16];
+	char str[8];
 	uint8_t tmp;
-	uint8_t send = 0;
+	usbconn = 0;
 
 	myDelay_init();
 	hw_init();
 	usb_init();
-	lcd_init();//myDelay(10);
+	lcd_init();
 
-
-//	NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
-/*
-	LED_ON(8);
-	myDelay(2000);
-	LED_OFF(8);
-*/
-//	printf("Hello Semi\n");
-//	trace_puts("Hello ARM World!");
-	// Infinite loop
-//
-//	LED_ON(0);
-	lcd_loadfont(chr,7);//myDelay(10);
+	lcd_loadfont(chr,6);
 
 	lcd_prn();
-
+	lcd_cmd(LCD3+12);
+	sprintf(str,"%8d",speed);
+	lcd_str(str);
 	while (1) {
 
 		if ((tmp = getkey())) {
-			if (tmp == 0x30) lcd_cmd(LCLS);
-			if (tmp == 0x31) {
-//				lcd_cmd(LCD0);
-				lcd_prn();
+			switch (tmp) {
+				case 0x30:
+					lcd_cmd(LCLS);
+					lcd_prn();
+					break;
+				case 0x45:
+					lcd_cmd(LCLS);
+					break;
+				case 0x40:
+					way = 0;
+					lcd_prn_way();
+					break;
+				case 0x41:
+					way = 1;
+					lcd_prn_way();
+					break;
+				case 0x42:
+					if (speed > 1000) speed -= 100;
+					lcd_prn_speed();
+					break;
+				case 0x43:
+					if (speed < 10000) speed += 100;
+					lcd_prn_speed();
+					break;
 			}
-			beep();
 		}
-		lcd_cmd(LCD0 + 16);
-		//if (testUSB()) lcd_str("USB"); else lcd_str("   ");
+		if (testUSB()!=usbconn) {
+			lcd_cmd(LCD0 + 16);
+			usbconn = testUSB();
+			lcd_prn_usb();
+		}
 		if (getCommCount()) {
 			tmp = getCommBuff(comm);
 			comm[tmp] = 0;
+			lcd_cmd(LCD0);
 			lcd_str((const char*)comm);
-			sendCommBuff((uint8_t*)comm,tmp);
+			parser(comm);
+			//sendCommBuff((uint8_t*)comm,tmp);
 			beep();
-/*
-			if (!strcmp((const char*)comm,"q1\n")) send = 1;
-			if (!strcmp((const char*)comm,"q0\n")) send = 2;
-			if (!strcmp((const char*)comm,"w1\n")) send = 3;
-			if (!strcmp((const char*)comm,"w0\n")) send = 4;
-*/
 		}
-/*
-		switch (send) {
-			case 1:
-//				sendCommBuff((uint8_t*)"Hello world!!!\n",15);
-				lcd_str(" send q1 ");
-				send = 0;
-				break;
-			case 2:
-//				sendCommBuff((uint8_t*)"Hello off     \n",15);
-				lcd_str(" send q0 ");
-				send = 0;
-				break;
-			case 3:
-//				sendCommBuff((uint8_t*)"Valera on     \n",15);
-				lcd_str(" send w1 ");
-				send = 0;
-				break;
-			case 4:
-//				sendCommBuff((uint8_t*)"Valera off    \n",15);
-				lcd_str(" send w0 ");
-				send = 0;
-				break;
-			default:
-				break;
-		}
-*/
-
 		myDelay(100);
-
-//		if (GPIOC->IDR & (1 << 11)) LED_ON; else LED_OFF;
 	}
 }
-void EXTI15_10_IRQHandler() {
-	if (EXTI->PR & 0x800) {
-		EXTI->PR |= 0x800;
-	}
-	if (GPIOC->IDR & 0x800) GPIOA->BSRR = 0x20;
-	else GPIOA->BSRR = (0x20 << 16);
-}
-
 
 #pragma GCC diagnostic pop
 

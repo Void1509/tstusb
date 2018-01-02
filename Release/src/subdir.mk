@@ -8,6 +8,7 @@ C_SRCS += \
 ../src/disp.c \
 ../src/hw_init.c \
 ../src/main.c \
+../src/prser.c \
 ../src/usb.c \
 ../src/usbcore.c 
 
@@ -16,6 +17,7 @@ OBJS += \
 ./src/disp.o \
 ./src/hw_init.o \
 ./src/main.o \
+./src/prser.o \
 ./src/usb.o \
 ./src/usbcore.o 
 
@@ -24,6 +26,7 @@ C_DEPS += \
 ./src/disp.d \
 ./src/hw_init.d \
 ./src/main.d \
+./src/prser.d \
 ./src/usb.d \
 ./src/usbcore.d 
 

@@ -8,7 +8,7 @@
 #include "usb.h"
 #define BLSIZE		0x8000
 
-void beep();
+//void beep();
 
 void usb_ctr_int();
 void usb_pma_int();

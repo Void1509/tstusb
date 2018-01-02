@@ -106,9 +106,11 @@ void lcd_cmd(char ch) {
 	}
 }
 void lcd_init() {
+/*
 	GPIOB->CRL = 0x11111111;
 	GPIOB->CRH &= 0xffffff00;
 	GPIOB->CRH |= 0x19;
+*/
 	RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;
 
 	TIM4->CNT = 0;
